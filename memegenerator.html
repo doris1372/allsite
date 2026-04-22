@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meme Generator - AllSite</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .meme-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 2rem;
+        }
+
+        .meme-layout {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .canvas-area {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px var(--shadow);
+            text-align: center;
+        }
+
+        #memeCanvas {
+            max-width: 100%;
+            border: 3px solid var(--primary);
+            border-radius: 10px;
+            background: white;
+            cursor: crosshair;
+        }
+
+        .controls-panel {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px var(--shadow);
+        }
+
+        .controls-panel h3 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .control-group {
+            margin: 1.5rem 0;
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+
+        .control-group input,
+        .control-group select,
+        .control-group textarea {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid var(--primary);
+            border-radius: 8px;
+            background: var(--bg);
+            color: var(--text);
+            font-size: 1rem;
+        }
+
+        .control-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .templates-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .template-card {
+            aspect-ratio: 1;
+            background: var(--bg);
+            border: 2px solid var(--primary);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .template-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px var(--shadow);
+        }
+
+        .template-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .template-name {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 0.5rem;
+            text-align: center;
+            font-size: 0.8rem;
+        }
+
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .action-buttons button {
+            padding: 1rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1rem;
+        }
+
+        .action-buttons button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px var(--shadow);
+        }
+
+        .upload-btn {
+            width: 100%;
+            padding: 1rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            margin: 1rem 0;
+        }
+
+        @media (max-width: 1000px) {
+            .meme-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">😂 Meme Generator</div>
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="drawing.html">Drawing</a></li>
+            <li><a href="music.html">Music</a></li>
+            <li><a href="quiz.html">Quiz</a></li>
+            <li><a href="casino.html">Casino</a></li>
+            <li><a href="ru.html">RU</a></li>
+            <li><a href="index.html">EN</a></li>
+        </ul>
+        <button class="theme-toggle" id="themeToggle">🌙</button>
+    </nav>
+
+    <div class="meme-container">
+        <h1 style="text-align: center;">😂 Meme Generator</h1>
+
+        <div class="meme-layout">
+            <div class="canvas-area">
+                <canvas id="memeCanvas" width="600" height="600"></canvas>
+            </div>
+
+            <div class="controls-panel">
+                <h3>🖼️ Templates</h3>
+                <div class="templates-grid" id="templatesGrid"></div>
+
+                <input type="file" id="imageUpload" accept="image/*" style="display: none;" onchange="uploadImage(event)">
+                <button class="upload-btn" onclick="document.getElementById('imageUpload').click()">📁 Upload Image</button>
+
+                <h3 style="margin-top: 2rem;">📝 Text</h3>
+
+                <div class="control-group">
+                    <label>Top Text</label>
+                    <textarea id="topText" placeholder="TOP TEXT" oninput="updateMeme()"></textarea>
+                </div>
+
+                <div class="control-group">
+                    <label>Bottom Text</label>
+                    <textarea id="bottomText" placeholder="BOTTOM TEXT" oninput="updateMeme()"></textarea>
+                </div>
+
+                <div class="control-group">
+                    <label>Font Size</label>
+                    <input type="range" id="fontSize" min="20" max="80" value="50" oninput="updateMeme()">
+                </div>
+
+                <div class="control-group">
+                    <label>Text Color</label>
+                    <input type="color" id="textColor" value="#ffffff" onchange="updateMeme()">
+                </div>
+
+                <div class="control-group">
+                    <label>Stroke Color</label>
+                    <input type="color" id="strokeColor" value="#000000" onchange="updateMeme()">
+                </div>
+
+                <div class="control-group">
+                    <label>Font Style</label>
+                    <select id="fontStyle" onchange="updateMeme()">
+                        <option value="Impact">Impact</option>
+                        <option value="Arial Black">Arial Black</option>
+                        <option value="Comic Sans MS">Comic Sans</option>
+                        <option value="Courier New">Courier New</option>
+                        <option value="Georgia">Georgia</option>
+                    </select>
+                </div>
+
+                <div class="action-buttons">
+                    <button onclick="downloadMeme()">💾 Download Meme</button>
+                    <button onclick="shareMeme()">🔗 Share</button>
+                    <button onclick="clearMeme()">🗑️ Clear</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Theme Toggle
+        const themeToggle = document.getElementById('themeToggle');
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            themeToggle.textContent = document.body.classList.contains('dark-mode') ? '☀️' : '🌙';
+            localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+        });
+
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark-mode');
+            themeToggle.textContent = '☀️';
+        }
+
+        // Meme Generator
+        const canvas = document.getElementById('memeCanvas');
+        const ctx = canvas.getContext('2d');
+        let currentImage = null;
+
+        // Meme templates (using colored backgrounds as placeholders)
+        const templates = [
+            { name: 'Drake', color: '#FFD700' },
+            { name: 'Distracted Boyfriend', color: '#FF6B6B' },
+            { name: 'Two Buttons', color: '#4ECDC4' },
+            { name: 'Change My Mind', color: '#95E1D3' },
+            { name: 'Expanding Brain', color: '#F38181' },
+            { name: 'Woman Yelling at Cat', color: '#AA96DA' },
+            { name: 'Bernie Sanders', color: '#FCBAD3' },
+            { name: 'This Is Fine', color: '#FFFFD2' }
+        ];
+
+        // Render templates
+        const templatesGrid = document.getElementById('templatesGrid');
+        templates.forEach((template, index) => {
+            const card = document.createElement('div');
+            card.className = 'template-card';
+            card.style.background = template.color;
+            card.innerHTML = `<div class="template-name">${template.name}</div>`;
+            card.onclick = () => loadTemplate(template);
+            templatesGrid.appendChild(card);
+        });
+
+        function loadTemplate(template) {
+            // Create colored background as template
+            ctx.fillStyle = template.color;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Add template name in center
+            ctx.fillStyle = 'rgba(0,0,0,0.3)';
+            ctx.font = 'bold 40px Impact';
+            ctx.textAlign = 'center';
+            ctx.fillText(template.name, canvas.width / 2, canvas.height / 2);
+
+            currentImage = null;
+            updateMeme();
+        }
+
+        function uploadImage(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        currentImage = img;
+                        updateMeme();
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function updateMeme() {
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw image or background
+            if (currentImage) {
+                const scale = Math.min(canvas.width / currentImage.width, canvas.height / currentImage.height);
+                const x = (canvas.width - currentImage.width * scale) / 2;
+                const y = (canvas.height - currentImage.height * scale) / 2;
+                ctx.drawImage(currentImage, x, y, currentImage.width * scale, currentImage.height * scale);
+            } else {
+                ctx.fillStyle = '#f0f0f0';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            }
+
+            // Get text settings
+            const topText = document.getElementById('topText').value.toUpperCase();
+            const bottomText = document.getElementById('bottomText').value.toUpperCase();
+            const fontSize = document.getElementById('fontSize').value;
+            const textColor = document.getElementById('textColor').value;
+            const strokeColor = document.getElementById('strokeColor').value;
+            const fontStyle = document.getElementById('fontStyle').value;
+
+            // Set text style
+            ctx.font = `bold ${fontSize}px ${fontStyle}`;
+            ctx.fillStyle = textColor;
+            ctx.strokeStyle = strokeColor;
+            ctx.lineWidth = 3;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'top';
+
+            // Draw top text
+            if (topText) {
+                const lines = wrapText(topText, canvas.width - 40);
+                lines.forEach((line, i) => {
+                    const y = 20 + (i * parseInt(fontSize));
+                    ctx.strokeText(line, canvas.width / 2, y);
+                    ctx.fillText(line, canvas.width / 2, y);
+                });
+            }
+
+            // Draw bottom text
+            if (bottomText) {
+                const lines = wrapText(bottomText, canvas.width - 40);
+                ctx.textBaseline = 'bottom';
+                lines.reverse().forEach((line, i) => {
+                    const y = canvas.height - 20 - (i * parseInt(fontSize));
+                    ctx.strokeText(line, canvas.width / 2, y);
+                    ctx.fillText(line, canvas.width / 2, y);
+                });
+            }
+        }
+
+        function wrapText(text, maxWidth) {
+            const words = text.split(' ');
+            const lines = [];
+            let currentLine = words[0];
+
+            for (let i = 1; i < words.length; i++) {
+                const word = words[i];
+                const width = ctx.measureText(currentLine + ' ' + word).width;
+                if (width < maxWidth) {
+                    currentLine += ' ' + word;
+                } else {
+                    lines.push(currentLine);
+                    currentLine = word;
+                }
+            }
+            lines.push(currentLine);
+            return lines;
+        }
+
+        function downloadMeme() {
+            const link = document.createElement('a');
+            link.download = `meme-${Date.now()}.png`;
+            link.href = canvas.toDataURL();
+            link.click();
+            alert('💾 Meme downloaded!');
+        }
+
+        function shareMeme() {
+            canvas.toBlob((blob) => {
+                if (navigator.share) {
+                    const file = new File([blob], 'meme.png', { type: 'image/png' });
+                    navigator.share({
+                        files: [file],
+                        title: 'Check out my meme!',
+                        text: 'Made with AllSite Meme Generator'
+                    }).catch(() => {
+                        copyToClipboard(blob);
+                    });
+                } else {
+                    copyToClipboard(blob);
+                }
+            });
+        }
+
+        function copyToClipboard(blob) {
+            navigator.clipboard.write([
+                new ClipboardItem({ 'image/png': blob })
+            ]).then(() => {
+                alert('📋 Meme copied to clipboard!');
+            }).catch(() => {
+                alert('❌ Sharing not supported. Use download instead.');
+            });
+        }
+
+        function clearMeme() {
+            document.getElementById('topText').value = '';
+            document.getElementById('bottomText').value = '';
+            currentImage = null;
+            ctx.fillStyle = '#f0f0f0';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+
+        // Initialize with default template
+        loadTemplate(templates[0]);
+    </script>
+</body>
+</html>

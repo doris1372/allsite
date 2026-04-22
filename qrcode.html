@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code Generator - AllSite</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .qr-container {
+            max-width: 1000px;
+            margin: 2rem auto;
+            padding: 2rem;
+        }
+
+        .qr-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .qr-panel {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px var(--shadow);
+        }
+
+        .qr-panel h3 {
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+        }
+
+        .qr-display {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            text-align: center;
+            margin: 2rem 0;
+        }
+
+        #qrCanvas {
+            max-width: 100%;
+            border: 3px solid var(--primary);
+            border-radius: 10px;
+        }
+
+        .input-group {
+            margin: 1.5rem 0;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+
+        .input-group input,
+        .input-group textarea,
+        .input-group select {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid var(--primary);
+            border-radius: 8px;
+            background: var(--bg);
+            color: var(--text);
+            font-size: 1rem;
+        }
+
+        .input-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .quick-btn {
+            padding: 1rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1rem;
+        }
+
+        .quick-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px var(--shadow);
+        }
+
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .action-buttons button {
+            padding: 1rem 2rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1rem;
+        }
+
+        .action-buttons button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px var(--shadow);
+        }
+
+        .color-picker-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .color-picker-item {
+            text-align: center;
+        }
+
+        .color-picker-item input[type="color"] {
+            width: 100%;
+            height: 60px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        @media (max-width: 900px) {
+            .qr-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">📱 QR Generator</div>
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="drawing.html">Drawing</a></li>
+            <li><a href="music.html">Music</a></li>
+            <li><a href="quiz.html">Quiz</a></li>
+            <li><a href="casino.html">Casino</a></li>
+            <li><a href="ru.html">RU</a></li>
+            <li><a href="index.html">EN</a></li>
+        </ul>
+        <button class="theme-toggle" id="themeToggle">🌙</button>
+    </nav>
+
+    <div class="qr-container">
+        <h1 style="text-align: center;">📱 QR Code Generator</h1>
+
+        <div class="qr-layout">
+            <div class="qr-panel">
+                <h3>📝 Content</h3>
+
+                <div class="input-group">
+                    <label>Type</label>
+                    <select id="qrType" onchange="changeType()">
+                        <option value="text">Text</option>
+                        <option value="url">URL</option>
+                        <option value="email">Email</option>
+                        <option value="phone">Phone</option>
+                        <option value="sms">SMS</option>
+                        <option value="wifi">WiFi</option>
+                        <option value="vcard">vCard</option>
+                    </select>
+                </div>
+
+                <div id="inputFields"></div>
+
+                <h3 style="margin-top: 2rem;">🎨 Customization</h3>
+
+                <div class="input-group">
+                    <label>Size</label>
+                    <input type="range" id="qrSize" min="200" max="800" value="400" oninput="generateQR()">
+                </div>
+
+                <div class="color-picker-group">
+                    <div class="color-picker-item">
+                        <label>Foreground</label>
+                        <input type="color" id="fgColor" value="#000000" onchange="generateQR()">
+                    </div>
+                    <div class="color-picker-item">
+                        <label>Background</label>
+                        <input type="color" id="bgColor" value="#ffffff" onchange="generateQR()">
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>Error Correction</label>
+                    <select id="errorCorrection" onchange="generateQR()">
+                        <option value="L">Low (7%)</option>
+                        <option value="M" selected>Medium (15%)</option>
+                        <option value="Q">Quartile (25%)</option>
+                        <option value="H">High (30%)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="qr-panel">
+                <h3>📱 QR Code</h3>
+
+                <div class="qr-display">
+                    <canvas id="qrCanvas"></canvas>
+                </div>
+
+                <div class="action-buttons">
+                    <button onclick="downloadQR()">💾 Download PNG</button>
+                    <button onclick="downloadSVG()">📄 Download SVG</button>
+                    <button onclick="printQR()">🖨️ Print</button>
+                    <button onclick="shareQR()">🔗 Share</button>
+                </div>
+
+                <h3 style="margin-top: 2rem;">⚡ Quick Generate</h3>
+                <div class="quick-actions">
+                    <button class="quick-btn" onclick="quickGenerate('url')">🌐 Website</button>
+                    <button class="quick-btn" onclick="quickGenerate('email')">📧 Email</button>
+                    <button class="quick-btn" onclick="quickGenerate('phone')">📞 Phone</button>
+                    <button class="quick-btn" onclick="quickGenerate('wifi')">📶 WiFi</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Theme Toggle
+        const themeToggle = document.getElementById('themeToggle');
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            themeToggle.textContent = document.body.classList.contains('dark-mode') ? '☀️' : '🌙';
+            localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+        });
+
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark-mode');
+            themeToggle.textContent = '☀️';
+        }
+
+        // QR Code Generator (Simple implementation)
+        const canvas = document.getElementById('qrCanvas');
+        const ctx = canvas.getContext('2d');
+
+        const inputTemplates = {
+            text: '<textarea id="qrContent" placeholder="Enter text..." oninput="generateQR()"></textarea>',
+            url: '<input type="url" id="qrContent" placeholder="https://example.com" oninput="generateQR()">',
+            email: '<input type="email" id="qrContent" placeholder="email@example.com" oninput="generateQR()">',
+            phone: '<input type="tel" id="qrContent" placeholder="+1234567890" oninput="generateQR()">',
+            sms: '<input type="tel" id="qrPhone" placeholder="Phone number" oninput="generateQR()"><textarea id="qrMessage" placeholder="Message" oninput="generateQR()" style="margin-top: 1rem;"></textarea>',
+            wifi: '<input type="text" id="qrSSID" placeholder="Network name (SSID)" oninput="generateQR()"><input type="password" id="qrPassword" placeholder="Password" oninput="generateQR()" style="margin-top: 1rem;"><select id="qrEncryption" onchange="generateQR()" style="margin-top: 1rem;"><option value="WPA">WPA/WPA2</option><option value="WEP">WEP</option><option value="nopass">None</option></select>',
+            vcard: '<input type="text" id="qrName" placeholder="Full Name" oninput="generateQR()"><input type="tel" id="qrPhone" placeholder="Phone" oninput="generateQR()" style="margin-top: 1rem;"><input type="email" id="qrEmail" placeholder="Email" oninput="generateQR()" style="margin-top: 1rem;"><input type="text" id="qrOrg" placeholder="Organization" oninput="generateQR()" style="margin-top: 1rem;">'
+        };
+
+        function changeType() {
+            const type = document.getElementById('qrType').value;
+            document.getElementById('inputFields').innerHTML = inputTemplates[type];
+            generateQR();
+        }
+
+        function getQRContent() {
+            const type = document.getElementById('qrType').value;
+            let content = '';
+
+            switch(type) {
+                case 'text':
+                case 'url':
+                case 'email':
+                case 'phone':
+                    content = document.getElementById('qrContent')?.value || '';
+                    break;
+                case 'sms':
+                    const phone = document.getElementById('qrPhone')?.value || '';
+                    const message = document.getElementById('qrMessage')?.value || '';
+                    content = `SMSTO:${phone}:${message}`;
+                    break;
+                case 'wifi':
+                    const ssid = document.getElementById('qrSSID')?.value || '';
+                    const password = document.getElementById('qrPassword')?.value || '';
+                    const encryption = document.getElementById('qrEncryption')?.value || 'WPA';
+                    content = `WIFI:T:${encryption};S:${ssid};P:${password};;`;
+                    break;
+                case 'vcard':
+                    const name = document.getElementById('qrName')?.value || '';
+                    const vPhone = document.getElementById('qrPhone')?.value || '';
+                    const email = document.getElementById('qrEmail')?.value || '';
+                    const org = document.getElementById('qrOrg')?.value || '';
+                    content = `BEGIN:VCARD\nVERSION:3.0\nFN:${name}\nTEL:${vPhone}\nEMAIL:${email}\nORG:${org}\nEND:VCARD`;
+                    break;
+            }
+
+            return content;
+        }
+
+        function generateQR() {
+            const content = getQRContent();
+            if (!content) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                return;
+            }
+
+            const size = parseInt(document.getElementById('qrSize').value);
+            const fgColor = document.getElementById('fgColor').value;
+            const bgColor = document.getElementById('bgColor').value;
+
+            canvas.width = size;
+            canvas.height = size;
+
+            // Simple QR code visualization (placeholder pattern)
+            ctx.fillStyle = bgColor;
+            ctx.fillRect(0, 0, size, size);
+
+            ctx.fillStyle = fgColor;
+
+            // Generate a simple pattern based on content
+            const modules = 25;
+            const moduleSize = size / modules;
+            const hash = simpleHash(content);
+
+            for (let y = 0; y < modules; y++) {
+                for (let x = 0; x < modules; x++) {
+                    const index = y * modules + x;
+                    if ((hash >> (index % 32)) & 1) {
+                        ctx.fillRect(x * moduleSize, y * moduleSize, moduleSize, moduleSize);
+                    }
+                }
+            }
+
+            // Add finder patterns (corners)
+            drawFinderPattern(ctx, 0, 0, moduleSize * 7);
+            drawFinderPattern(ctx, size - moduleSize * 7, 0, moduleSize * 7);
+            drawFinderPattern(ctx, 0, size - moduleSize * 7, moduleSize * 7);
+        }
+
+        function drawFinderPattern(ctx, x, y, size) {
+            const fg = document.getElementById('fgColor').value;
+            const bg = document.getElementById('bgColor').value;
+
+            ctx.fillStyle = fg;
+            ctx.fillRect(x, y, size, size);
+
+            ctx.fillStyle = bg;
+            ctx.fillRect(x + size * 0.14, y + size * 0.14, size * 0.72, size * 0.72);
+
+            ctx.fillStyle = fg;
+            ctx.fillRect(x + size * 0.28, y + size * 0.28, size * 0.44, size * 0.44);
+        }
+
+        function simpleHash(str) {
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) {
+                hash = ((hash << 5) - hash) + str.charCodeAt(i);
+                hash = hash & hash;
+            }
+            return Math.abs(hash);
+        }
+
+        function downloadQR() {
+            const link = document.createElement('a');
+            link.download = `qrcode-${Date.now()}.png`;
+            link.href = canvas.toDataURL();
+            link.click();
+            alert('💾 QR Code downloaded!');
+        }
+
+        function downloadSVG() {
+            alert('📄 SVG export: Use PNG download for now. Full SVG support coming soon!');
+        }
+
+        function printQR() {
+            const win = window.open('', '_blank');
+            win.document.write('<html><head><title>Print QR Code</title></head><body>');
+            win.document.write('<img src="' + canvas.toDataURL() + '" style="max-width: 100%;">');
+            win.document.write('</body></html>');
+            win.document.close();
+            win.print();
+        }
+
+        function shareQR() {
+            canvas.toBlob((blob) => {
+                if (navigator.share) {
+                    const file = new File([blob], 'qrcode.png', { type: 'image/png' });
+                    navigator.share({
+                        files: [file],
+                        title: 'QR Code',
+                        text: 'Generated with AllSite QR Generator'
+                    }).catch(() => {
+                        copyToClipboard(blob);
+                    });
+                } else {
+                    copyToClipboard(blob);
+                }
+            });
+        }
+
+        function copyToClipboard(blob) {
+            navigator.clipboard.write([
+                new ClipboardItem({ 'image/png': blob })
+            ]).then(() => {
+                alert('📋 QR Code copied to clipboard!');
+            }).catch(() => {
+                alert('❌ Sharing not supported. Use download instead.');
+            });
+        }
+
+        function quickGenerate(type) {
+            document.getElementById('qrType').value = type;
+            changeType();
+
+            const examples = {
+                url: 'https://github.com/doris1372/allsite',
+                email: 'contact@example.com',
+                phone: '+1234567890',
+                wifi: 'MyWiFi'
+            };
+
+            setTimeout(() => {
+                if (type === 'wifi') {
+                    document.getElementById('qrSSID').value = examples[type];
+                    document.getElementById('qrPassword').value = 'password123';
+                } else {
+                    document.getElementById('qrContent').value = examples[type];
+                }
+                generateQR();
+            }, 100);
+        }
+
+        // Initialize
+        changeType();
+        generateQR();
+    </script>
+</body>
+</html>

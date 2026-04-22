@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Editor - AllSite</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .video-container {
+            max-width: 1600px;
+            margin: 2rem auto;
+            padding: 2rem;
+        }
+
+        .editor-layout {
+            display: grid;
+            grid-template-columns: 250px 1fr 250px;
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .panel {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px var(--shadow);
+        }
+
+        .panel h3 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .video-preview {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px var(--shadow);
+        }
+
+        #videoPlayer {
+            width: 100%;
+            max-height: 500px;
+            border-radius: 10px;
+            background: #000;
+        }
+
+        .timeline {
+            background: var(--bg);
+            padding: 1rem;
+            border-radius: 10px;
+            margin-top: 1rem;
+            height: 100px;
+            position: relative;
+            overflow-x: auto;
+        }
+
+        .timeline-track {
+            height: 60px;
+            background: var(--card-bg);
+            border-radius: 5px;
+            position: relative;
+        }
+
+        .timeline-clip {
+            position: absolute;
+            height: 100%;
+            background: var(--primary);
+            border-radius: 5px;
+            cursor: move;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.8rem;
+        }
+
+        .playback-controls {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin: 1rem 0;
+            flex-wrap: wrap;
+        }
+
+        .playback-controls button {
+            padding: 1rem 2rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1rem;
+        }
+
+        .playback-controls button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px var(--shadow);
+        }
+
+        .tool-button {
+            width: 100%;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            background: var(--bg);
+            border: 2px solid var(--primary);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .tool-button:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .slider-control {
+            margin: 1rem 0;
+        }
+
+        .slider-control label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+
+        .slider-control input[type="range"] {
+            width: 100%;
+        }
+
+        .slider-value {
+            text-align: center;
+            color: var(--primary);
+            font-weight: bold;
+            margin-top: 0.5rem;
+        }
+
+        .upload-area {
+            border: 3px dashed var(--primary);
+            border-radius: 15px;
+            padding: 3rem 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 1rem 0;
+        }
+
+        .upload-area:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .upload-area input {
+            display: none;
+        }
+
+        .effects-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+
+        .effect-btn {
+            padding: 0.8rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+
+        .effect-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px var(--shadow);
+        }
+
+        @media (max-width: 1200px) {
+            .editor-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">🎬 Video Editor</div>
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="drawing.html">Drawing</a></li>
+            <li><a href="music.html">Music</a></li>
+            <li><a href="quiz.html">Quiz</a></li>
+            <li><a href="casino.html">Casino</a></li>
+            <li><a href="ru.html">RU</a></li>
+            <li><a href="index.html">EN</a></li>
+        </ul>
+        <button class="theme-toggle" id="themeToggle">🌙</button>
+    </nav>
+
+    <div class="video-container">
+        <h1 style="text-align: center;">🎬 Video Editor</h1>
+
+        <div class="upload-area" onclick="document.getElementById('videoInput').click()">
+            <input type="file" id="videoInput" accept="video/*" onchange="loadVideo(event)">
+            <h2>🎥 Click to Upload Video</h2>
+            <p>or drag and drop</p>
+        </div>
+
+        <div class="editor-layout">
+            <div class="panel">
+                <h3>🎨 Effects</h3>
+                <div class="effects-grid">
+                    <button class="effect-btn" onclick="applyEffect('grayscale')">⚫ Grayscale</button>
+                    <button class="effect-btn" onclick="applyEffect('sepia')">🟤 Sepia</button>
+                    <button class="effect-btn" onclick="applyEffect('invert')">🔄 Invert</button>
+                    <button class="effect-btn" onclick="applyEffect('blur')">💫 Blur</button>
+                    <button class="effect-btn" onclick="applyEffect('brightness')">☀️ Bright</button>
+                    <button class="effect-btn" onclick="applyEffect('contrast')">🎭 Contrast</button>
+                    <button class="effect-btn" onclick="applyEffect('saturate')">🌈 Saturate</button>
+                    <button class="effect-btn" onclick="applyEffect('hue')">🎨 Hue Shift</button>
+                </div>
+
+                <h3 style="margin-top: 2rem;">✂️ Tools</h3>
+                <button class="tool-button" onclick="trimVideo()">✂️ Trim</button>
+                <button class="tool-button" onclick="rotateVideo()">🔄 Rotate</button>
+                <button class="tool-button" onclick="flipVideo()">↔️ Flip</button>
+                <button class="tool-button" onclick="addText()">📝 Add Text</button>
+                <button class="tool-button" onclick="resetEffects()">↩️ Reset</button>
+            </div>
+
+            <div>
+                <div class="video-preview">
+                    <video id="videoPlayer" controls></video>
+
+                    <div class="playback-controls">
+                        <button onclick="playPause()">▶️ Play/Pause</button>
+                        <button onclick="skipBackward()">⏪ -5s</button>
+                        <button onclick="skipForward()">⏩ +5s</button>
+                        <button onclick="setSpeed(0.5)">0.5x</button>
+                        <button onclick="setSpeed(1)">1x</button>
+                        <button onclick="setSpeed(1.5)">1.5x</button>
+                        <button onclick="setSpeed(2)">2x</button>
+                    </div>
+
+                    <div class="timeline">
+                        <div class="timeline-track" id="timelineTrack">
+                            <div class="timeline-clip" id="videoClip" style="left: 0; width: 100%;">Video</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h3>🎛️ Adjustments</h3>
+
+                <div class="slider-control">
+                    <label>Brightness</label>
+                    <input type="range" id="brightness" min="0" max="200" value="100" oninput="updateFilters()">
+                    <div class="slider-value" id="brightnessValue">100%</div>
+                </div>
+
+                <div class="slider-control">
+                    <label>Contrast</label>
+                    <input type="range" id="contrast" min="0" max="200" value="100" oninput="updateFilters()">
+                    <div class="slider-value" id="contrastValue">100%</div>
+                </div>
+
+                <div class="slider-control">
+                    <label>Saturation</label>
+                    <input type="range" id="saturation" min="0" max="200" value="100" oninput="updateFilters()">
+                    <div class="slider-value" id="saturationValue">100%</div>
+                </div>
+
+                <div class="slider-control">
+                    <label>Blur</label>
+                    <input type="range" id="blur" min="0" max="20" value="0" oninput="updateFilters()">
+                    <div class="slider-value" id="blurValue">0px</div>
+                </div>
+
+                <div class="slider-control">
+                    <label>Hue Rotate</label>
+                    <input type="range" id="hue" min="0" max="360" value="0" oninput="updateFilters()">
+                    <div class="slider-value" id="hueValue">0°</div>
+                </div>
+
+                <div class="slider-control">
+                    <label>Volume</label>
+                    <input type="range" id="volume" min="0" max="100" value="100" oninput="updateVolume()">
+                    <div class="slider-value" id="volumeValue">100%</div>
+                </div>
+
+                <h3 style="margin-top: 2rem;">💾 Export</h3>
+                <button class="tool-button" onclick="exportVideo()">💾 Download Video</button>
+                <button class="tool-button" onclick="captureFrame()">📸 Capture Frame</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Theme Toggle
+        const themeToggle = document.getElementById('themeToggle');
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            themeToggle.textContent = document.body.classList.contains('dark-mode') ? '☀️' : '🌙';
+            localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+        });
+
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark-mode');
+            themeToggle.textContent = '☀️';
+        }
+
+        // Video Editor
+        const video = document.getElementById('videoPlayer');
+        let currentRotation = 0;
+        let flipH = 1;
+
+        // Drag and drop
+        const uploadArea = document.querySelector('.upload-area');
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.style.background = 'var(--primary)';
+            uploadArea.style.color = 'white';
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.style.background = '';
+            uploadArea.style.color = '';
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.style.background = '';
+            uploadArea.style.color = '';
+            const file = e.dataTransfer.files[0];
+            if (file && file.type.startsWith('video/')) {
+                loadVideoFile(file);
+            }
+        });
+
+        function loadVideo(event) {
+            const file = event.target.files[0];
+            if (file) {
+                loadVideoFile(file);
+            }
+        }
+
+        function loadVideoFile(file) {
+            const url = URL.createObjectURL(file);
+            video.src = url;
+            video.load();
+        }
+
+        function updateFilters() {
+            const brightness = document.getElementById('brightness').value;
+            const contrast = document.getElementById('contrast').value;
+            const saturation = document.getElementById('saturation').value;
+            const blur = document.getElementById('blur').value;
+            const hue = document.getElementById('hue').value;
+
+            document.getElementById('brightnessValue').textContent = brightness + '%';
+            document.getElementById('contrastValue').textContent = contrast + '%';
+            document.getElementById('saturationValue').textContent = saturation + '%';
+            document.getElementById('blurValue').textContent = blur + 'px';
+            document.getElementById('hueValue').textContent = hue + '°';
+
+            video.style.filter = `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturation}%) blur(${blur}px) hue-rotate(${hue}deg)`;
+            video.style.transform = `rotate(${currentRotation}deg) scaleX(${flipH})`;
+        }
+
+        function updateVolume() {
+            const volume = document.getElementById('volume').value;
+            document.getElementById('volumeValue').textContent = volume + '%';
+            video.volume = volume / 100;
+        }
+
+        function applyEffect(effect) {
+            const effects = {
+                grayscale: { brightness: 100, contrast: 100, saturation: 0, blur: 0, hue: 0 },
+                sepia: { brightness: 110, contrast: 90, saturation: 80, blur: 0, hue: 20 },
+                invert: { brightness: 100, contrast: 100, saturation: 100, blur: 0, hue: 180 },
+                blur: { brightness: 100, contrast: 100, saturation: 100, blur: 10, hue: 0 },
+                brightness: { brightness: 150, contrast: 100, saturation: 100, blur: 0, hue: 0 },
+                contrast: { brightness: 100, contrast: 150, saturation: 100, blur: 0, hue: 0 },
+                saturate: { brightness: 100, contrast: 100, saturation: 180, blur: 0, hue: 0 },
+                hue: { brightness: 100, contrast: 100, saturation: 100, blur: 0, hue: 180 }
+            };
+
+            const e = effects[effect];
+            document.getElementById('brightness').value = e.brightness;
+            document.getElementById('contrast').value = e.contrast;
+            document.getElementById('saturation').value = e.saturation;
+            document.getElementById('blur').value = e.blur;
+            document.getElementById('hue').value = e.hue;
+
+            updateFilters();
+        }
+
+        function playPause() {
+            if (video.paused) {
+                video.play();
+            } else {
+                video.pause();
+            }
+        }
+
+        function skipBackward() {
+            video.currentTime = Math.max(0, video.currentTime - 5);
+        }
+
+        function skipForward() {
+            video.currentTime = Math.min(video.duration, video.currentTime + 5);
+        }
+
+        function setSpeed(speed) {
+            video.playbackRate = speed;
+        }
+
+        function rotateVideo() {
+            currentRotation = (currentRotation + 90) % 360;
+            updateFilters();
+        }
+
+        function flipVideo() {
+            flipH *= -1;
+            updateFilters();
+        }
+
+        function trimVideo() {
+            const start = prompt('Enter start time (seconds):', '0');
+            const end = prompt('Enter end time (seconds):', video.duration);
+            if (start !== null && end !== null) {
+                video.currentTime = parseFloat(start);
+                alert(`Video will play from ${start}s to ${end}s. Use export to save trimmed version.`);
+            }
+        }
+
+        function addText() {
+            const text = prompt('Enter text to overlay:');
+            if (text) {
+                alert('Text overlay: ' + text + '\n(Note: Full text overlay requires canvas rendering)');
+            }
+        }
+
+        function resetEffects() {
+            document.getElementById('brightness').value = 100;
+            document.getElementById('contrast').value = 100;
+            document.getElementById('saturation').value = 100;
+            document.getElementById('blur').value = 0;
+            document.getElementById('hue').value = 0;
+            document.getElementById('volume').value = 100;
+            currentRotation = 0;
+            flipH = 1;
+            updateFilters();
+            updateVolume();
+        }
+
+        function captureFrame() {
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0);
+
+            canvas.toBlob((blob) => {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `frame-${Date.now()}.png`;
+                a.click();
+            });
+
+            alert('📸 Frame captured!');
+        }
+
+        function exportVideo() {
+            alert('💾 Video export requires server-side processing.\n\nFor now, you can:\n1. Use screen recording software\n2. Right-click video → Save video as\n3. Use browser extensions for video download');
+        }
+
+        // Update timeline on video progress
+        video.addEventListener('timeupdate', () => {
+            if (video.duration) {
+                const progress = (video.currentTime / video.duration) * 100;
+                // Update timeline visual here if needed
+            }
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                playPause();
+            } else if (e.code === 'ArrowLeft') {
+                skipBackward();
+            } else if (e.code === 'ArrowRight') {
+                skipForward();
+            }
+        });
+    </script>
+</body>
+</html>
