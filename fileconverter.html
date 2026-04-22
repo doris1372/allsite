@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Converter - AllSite</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .converter-container {
+            max-width: 1000px;
+            margin: 2rem auto;
+            padding: 2rem;
+        }
+
+        .converter-card {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px var(--shadow);
+            margin: 2rem 0;
+        }
+
+        .converter-card h3 {
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+        }
+
+        .upload-zone {
+            border: 3px dashed var(--primary);
+            border-radius: 15px;
+            padding: 3rem 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 2rem 0;
+        }
+
+        .upload-zone:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .upload-zone.dragover {
+            background: var(--primary);
+            color: white;
+            transform: scale(1.02);
+        }
+
+        .upload-zone input {
+            display: none;
+        }
+
+        .file-info {
+            background: var(--bg);
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin: 1rem 0;
+        }
+
+        .file-info-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 0.5rem 0;
+        }
+
+        .conversion-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .format-btn {
+            padding: 1.5rem;
+            background: var(--bg);
+            border: 2px solid var(--primary);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            font-size: 1rem;
+        }
+
+        .format-btn:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px var(--shadow);
+        }
+
+        .format-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .convert-button {
+            width: 100%;
+            padding: 1.5rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1.2rem;
+            margin: 2rem 0;
+        }
+
+        .convert-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px var(--shadow);
+        }
+
+        .convert-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: var(--bg);
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary);
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .converter-types {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .converter-type-card {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px var(--shadow);
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .converter-type-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px var(--shadow);
+        }
+
+        .converter-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">🔄 File Converter</div>
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="drawing.html">Drawing</a></li>
+            <li><a href="music.html">Music</a></li>
+            <li><a href="quiz.html">Quiz</a></li>
+            <li><a href="casino.html">Casino</a></li>
+            <li><a href="ru.html">RU</a></li>
+            <li><a href="index.html">EN</a></li>
+        </ul>
+        <button class="theme-toggle" id="themeToggle">🌙</button>
+    </nav>
+
+    <div class="converter-container">
+        <h1 style="text-align: center;">🔄 File Converter</h1>
+
+        <div class="converter-types">
+            <div class="converter-type-card" onclick="selectConverter('image')">
+                <div class="converter-icon">🖼️</div>
+                <h3>Image Converter</h3>
+                <p>PNG, JPG, WebP, GIF</p>
+            </div>
+            <div class="converter-type-card" onclick="selectConverter('document')">
+                <div class="converter-icon">📄</div>
+                <h3>Document Converter</h3>
+                <p>PDF, TXT, MD, HTML</p>
+            </div>
+            <div class="converter-type-card" onclick="selectConverter('audio')">
+                <div class="converter-icon">🎵</div>
+                <h3>Audio Converter</h3>
+                <p>MP3, WAV, OGG</p>
+            </div>
+            <div class="converter-type-card" onclick="selectConverter('video')">
+                <div class="converter-icon">🎬</div>
+                <h3>Video Converter</h3>
+                <p>MP4, WebM, AVI</p>
+            </div>
+        </div>
+
+        <div class="converter-card" id="converterCard" style="display: none;">
+            <h3 id="converterTitle">Image Converter</h3>
+
+            <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+                <input type="file" id="fileInput" onchange="handleFile(event)">
+                <h2>📁 Click to Upload File</h2>
+                <p>or drag and drop</p>
+            </div>
+
+            <div id="fileInfo" style="display: none;">
+                <div class="file-info">
+                    <div class="file-info-item">
+                        <strong>File Name:</strong>
+                        <span id="fileName"></span>
+                    </div>
+                    <div class="file-info-item">
+                        <strong>File Size:</strong>
+                        <span id="fileSize"></span>
+                    </div>
+                    <div class="file-info-item">
+                        <strong>File Type:</strong>
+                        <span id="fileType"></span>
+                    </div>
+                </div>
+
+                <h4 style="margin-top: 2rem;">Convert to:</h4>
+                <div class="conversion-options" id="conversionOptions"></div>
+
+                <button class="convert-button" id="convertBtn" onclick="convertFile()" disabled>
+                    🔄 Convert File
+                </button>
+
+                <div id="progressBar" style="display: none;">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill">0%</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Theme Toggle
+        const themeToggle = document.getElementById('themeToggle');
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            themeToggle.textContent = document.body.classList.contains('dark-mode') ? '☀️' : '🌙';
+            localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+        });
+
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark-mode');
+            themeToggle.textContent = '☀️';
+        }
+
+        // File Converter
+        let currentFile = null;
+        let currentConverter = null;
+        let selectedFormat = null;
+
+        const converterFormats = {
+            image: ['PNG', 'JPG', 'WebP', 'GIF', 'BMP', 'ICO'],
+            document: ['PDF', 'TXT', 'MD', 'HTML', 'JSON'],
+            audio: ['MP3', 'WAV', 'OGG', 'AAC'],
+            video: ['MP4', 'WebM', 'AVI', 'MOV']
+        };
+
+        const uploadZone = document.getElementById('uploadZone');
+
+        // Drag and drop
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.classList.add('dragover');
+        });
+
+        uploadZone.addEventListener('dragleave', () => {
+            uploadZone.classList.remove('dragover');
+        });
+
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('dragover');
+            const file = e.dataTransfer.files[0];
+            if (file) {
+                loadFile(file);
+            }
+        });
+
+        function selectConverter(type) {
+            currentConverter = type;
+            document.getElementById('converterCard').style.display = 'block';
+            document.getElementById('converterTitle').textContent =
+                type.charAt(0).toUpperCase() + type.slice(1) + ' Converter';
+
+            // Reset
+            currentFile = null;
+            selectedFormat = null;
+            document.getElementById('fileInfo').style.display = 'none';
+            document.getElementById('progressBar').style.display = 'none';
+        }
+
+        function handleFile(event) {
+            const file = event.target.files[0];
+            if (file) {
+                loadFile(file);
+            }
+        }
+
+        function loadFile(file) {
+            currentFile = file;
+
+            document.getElementById('fileName').textContent = file.name;
+            document.getElementById('fileSize').textContent = formatFileSize(file.size);
+            document.getElementById('fileType').textContent = file.type || 'Unknown';
+            document.getElementById('fileInfo').style.display = 'block';
+
+            renderFormatOptions();
+        }
+
+        function renderFormatOptions() {
+            const options = document.getElementById('conversionOptions');
+            options.innerHTML = '';
+
+            converterFormats[currentConverter].forEach(format => {
+                const btn = document.createElement('div');
+                btn.className = 'format-btn';
+                btn.textContent = format;
+                btn.onclick = () => selectFormat(format, btn);
+                options.appendChild(btn);
+            });
+        }
+
+        function selectFormat(format, element) {
+            selectedFormat = format;
+            document.querySelectorAll('.format-btn').forEach(btn => btn.classList.remove('active'));
+            element.classList.add('active');
+            document.getElementById('convertBtn').disabled = false;
+        }
+
+        function convertFile() {
+            if (!currentFile || !selectedFormat) return;
+
+            document.getElementById('progressBar').style.display = 'block';
+            document.getElementById('convertBtn').disabled = true;
+
+            // Simulate conversion progress
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += 10;
+                document.getElementById('progressFill').style.width = progress + '%';
+                document.getElementById('progressFill').textContent = progress + '%';
+
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        performConversion();
+                    }, 500);
+                }
+            }, 200);
+        }
+
+        function performConversion() {
+            const reader = new FileReader();
+
+            if (currentConverter === 'image') {
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = img.width;
+                        canvas.height = img.height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0);
+
+                        let mimeType = 'image/png';
+                        if (selectedFormat === 'JPG') mimeType = 'image/jpeg';
+                        else if (selectedFormat === 'WebP') mimeType = 'image/webp';
+                        else if (selectedFormat === 'GIF') mimeType = 'image/gif';
+
+                        canvas.toBlob((blob) => {
+                            downloadFile(blob, `converted.${selectedFormat.toLowerCase()}`);
+                        }, mimeType);
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(currentFile);
+            } else if (currentConverter === 'document') {
+                reader.onload = (e) => {
+                    let content = e.target.result;
+                    let blob;
+
+                    if (selectedFormat === 'TXT') {
+                        blob = new Blob([content], { type: 'text/plain' });
+                    } else if (selectedFormat === 'HTML') {
+                        const html = `<!DOCTYPE html><html><head><title>Converted</title></head><body><pre>${content}</pre></body></html>`;
+                        blob = new Blob([html], { type: 'text/html' });
+                    } else if (selectedFormat === 'JSON') {
+                        const json = JSON.stringify({ content: content }, null, 2);
+                        blob = new Blob([json], { type: 'application/json' });
+                    } else {
+                        blob = new Blob([content], { type: 'text/plain' });
+                    }
+
+                    downloadFile(blob, `converted.${selectedFormat.toLowerCase()}`);
+                };
+                reader.readAsText(currentFile);
+            } else {
+                alert('⚠️ Audio and video conversion requires server-side processing.\n\nFor now, image and document conversion are supported.');
+                resetConverter();
+            }
+        }
+
+        function downloadFile(blob, filename) {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            a.click();
+            URL.revokeObjectURL(url);
+
+            alert('✅ File converted and downloaded!');
+            resetConverter();
+        }
+
+        function resetConverter() {
+            document.getElementById('progressBar').style.display = 'none';
+            document.getElementById('progressFill').style.width = '0%';
+            document.getElementById('progressFill').textContent = '0%';
+            document.getElementById('convertBtn').disabled = false;
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+        }
+    </script>
+</body>
+</html>

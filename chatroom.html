@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Room - AllSite</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .chat-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 2rem;
+        }
+
+        .chat-layout {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .users-panel {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px var(--shadow);
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .users-panel h3 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .user-item {
+            padding: 1rem;
+            margin: 0.5rem 0;
+            background: var(--bg);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .user-status {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #4caf50;
+        }
+
+        .chat-main {
+            background: var(--card-bg);
+            border-radius: 15px;
+            box-shadow: 0 5px 15px var(--shadow);
+            display: flex;
+            flex-direction: column;
+            height: 600px;
+        }
+
+        .chat-header {
+            padding: 1.5rem;
+            border-bottom: 2px solid var(--primary);
+            background: var(--primary);
+            color: white;
+            border-radius: 15px 15px 0 0;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+            background: var(--bg);
+        }
+
+        .message {
+            margin: 1rem 0;
+            padding: 1rem;
+            border-radius: 10px;
+            max-width: 70%;
+            animation: slideIn 0.3s;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.own {
+            background: var(--primary);
+            color: white;
+            margin-left: auto;
+        }
+
+        .message.other {
+            background: var(--card-bg);
+        }
+
+        .message-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .message-content {
+            word-wrap: break-word;
+        }
+
+        .chat-input {
+            padding: 1.5rem;
+            border-top: 2px solid var(--primary);
+            display: flex;
+            gap: 1rem;
+            background: var(--card-bg);
+            border-radius: 0 0 15px 15px;
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 1rem;
+            border: 2px solid var(--primary);
+            border-radius: 10px;
+            background: var(--bg);
+            color: var(--text);
+            font-size: 1rem;
+        }
+
+        .chat-input button {
+            padding: 1rem 2rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1rem;
+        }
+
+        .chat-input button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px var(--shadow);
+        }
+
+        .typing-indicator {
+            padding: 1rem;
+            font-style: italic;
+            opacity: 0.7;
+        }
+
+        .emoji-picker {
+            display: flex;
+            gap: 0.5rem;
+            padding: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .emoji-btn {
+            padding: 0.5rem;
+            background: var(--bg);
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.5rem;
+            transition: all 0.3s;
+        }
+
+        .emoji-btn:hover {
+            transform: scale(1.2);
+        }
+
+        @media (max-width: 900px) {
+            .chat-layout {
+                grid-template-columns: 1fr;
+            }
+            .users-panel {
+                max-height: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">💬 Chat Room</div>
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="drawing.html">Drawing</a></li>
+            <li><a href="music.html">Music</a></li>
+            <li><a href="quiz.html">Quiz</a></li>
+            <li><a href="casino.html">Casino</a></li>
+            <li><a href="ru.html">RU</a></li>
+            <li><a href="index.html">EN</a></li>
+        </ul>
+        <button class="theme-toggle" id="themeToggle">🌙</button>
+    </nav>
+
+    <div class="chat-container">
+        <h1 style="text-align: center;">💬 Chat Room</h1>
+
+        <div class="chat-layout">
+            <div class="users-panel">
+                <h3>👥 Online Users</h3>
+                <div id="usersList"></div>
+            </div>
+
+            <div class="chat-main">
+                <div class="chat-header">
+                    <h3>💬 General Chat</h3>
+                    <p style="opacity: 0.8; margin-top: 0.5rem;">Welcome! Start chatting below</p>
+                </div>
+
+                <div class="chat-messages" id="chatMessages"></div>
+
+                <div class="typing-indicator" id="typingIndicator" style="display: none;">
+                    Someone is typing...
+                </div>
+
+                <div class="emoji-picker">
+                    <button class="emoji-btn" onclick="insertEmoji('😀')">😀</button>
+                    <button class="emoji-btn" onclick="insertEmoji('😂')">😂</button>
+                    <button class="emoji-btn" onclick="insertEmoji('❤️')">❤️</button>
+                    <button class="emoji-btn" onclick="insertEmoji('👍')">👍</button>
+                    <button class="emoji-btn" onclick="insertEmoji('🎉')">🎉</button>
+                    <button class="emoji-btn" onclick="insertEmoji('🔥')">🔥</button>
+                    <button class="emoji-btn" onclick="insertEmoji('💯')">💯</button>
+                    <button class="emoji-btn" onclick="insertEmoji('🚀')">🚀</button>
+                </div>
+
+                <div class="chat-input">
+                    <input type="text" id="messageInput" placeholder="Type a message..." onkeypress="handleKeyPress(event)">
+                    <button onclick="sendMessage()">Send</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Theme Toggle
+        const themeToggle = document.getElementById('themeToggle');
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            themeToggle.textContent = document.body.classList.contains('dark-mode') ? '☀️' : '🌙';
+            localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+        });
+
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark-mode');
+            themeToggle.textContent = '☀️';
+        }
+
+        // Chat Room
+        let username = localStorage.getItem('chatUsername') || prompt('Enter your username:') || 'User' + Math.floor(Math.random() * 1000);
+        localStorage.setItem('chatUsername', username);
+
+        const messages = [];
+        const users = [
+            { name: username, status: 'online' },
+            { name: 'Alice', status: 'online' },
+            { name: 'Bob', status: 'online' },
+            { name: 'Charlie', status: 'away' },
+            { name: 'Diana', status: 'online' }
+        ];
+
+        // Bot responses
+        const botResponses = [
+            "That's interesting! Tell me more.",
+            "I agree with you!",
+            "Hmm, I never thought about it that way.",
+            "Great point!",
+            "LOL 😂",
+            "That's awesome! 🎉",
+            "I'm not sure about that...",
+            "Definitely!",
+            "Could you explain more?",
+            "Nice! 👍"
+        ];
+
+        function renderUsers() {
+            const usersList = document.getElementById('usersList');
+            usersList.innerHTML = '';
+
+            users.forEach(user => {
+                const userItem = document.createElement('div');
+                userItem.className = 'user-item';
+                userItem.innerHTML = `
+                    <div class="user-status" style="background: ${user.status === 'online' ? '#4caf50' : '#ffc107'}"></div>
+                    <span>${user.name}</span>
+                `;
+                usersList.appendChild(userItem);
+            });
+        }
+
+        function renderMessages() {
+            const chatMessages = document.getElementById('chatMessages');
+            chatMessages.innerHTML = '';
+
+            messages.forEach(msg => {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${msg.user === username ? 'own' : 'other'}`;
+                messageDiv.innerHTML = `
+                    <div class="message-header">
+                        <strong>${msg.user}</strong>
+                        <span>${msg.time}</span>
+                    </div>
+                    <div class="message-content">${msg.content}</div>
+                `;
+                chatMessages.appendChild(messageDiv);
+            });
+
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const content = input.value.trim();
+
+            if (!content) return;
+
+            const message = {
+                user: username,
+                content: content,
+                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            };
+
+            messages.push(message);
+            renderMessages();
+            input.value = '';
+
+            // Simulate bot response
+            setTimeout(() => {
+                showTypingIndicator();
+                setTimeout(() => {
+                    hideTypingIndicator();
+                    const botUser = users[Math.floor(Math.random() * (users.length - 1)) + 1].name;
+                    const botMessage = {
+                        user: botUser,
+                        content: botResponses[Math.floor(Math.random() * botResponses.length)],
+                        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                    };
+                    messages.push(botMessage);
+                    renderMessages();
+                }, 2000);
+            }, 1000);
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        function insertEmoji(emoji) {
+            const input = document.getElementById('messageInput');
+            input.value += emoji;
+            input.focus();
+        }
+
+        function showTypingIndicator() {
+            document.getElementById('typingIndicator').style.display = 'block';
+        }
+
+        function hideTypingIndicator() {
+            document.getElementById('typingIndicator').style.display = 'none';
+        }
+
+        // Initialize
+        renderUsers();
+
+        // Welcome message
+        messages.push({
+            user: 'System',
+            content: `Welcome ${username}! Start chatting with others.`,
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        });
+
+        renderMessages();
+
+        // Simulate random messages
+        setInterval(() => {
+            if (Math.random() > 0.7) {
+                const randomUser = users[Math.floor(Math.random() * (users.length - 1)) + 1].name;
+                const randomMessages = [
+                    "Hey everyone! 👋",
+                    "How's it going?",
+                    "Anyone here?",
+                    "This chat is cool!",
+                    "What are you all up to?",
+                    "Great weather today!",
+                    "Check out this site, it's amazing!",
+                    "Anyone want to play a game?"
+                ];
+
+                messages.push({
+                    user: randomUser,
+                    content: randomMessages[Math.floor(Math.random() * randomMessages.length)],
+                    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                });
+
+                renderMessages();
+            }
+        }, 15000);
+    </script>
+</body>
+</html>
