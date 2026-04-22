@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice Recorder - AllSite</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .voice-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+        }
+
+        .recorder-card {
+            background: var(--card-bg);
+            padding: 3rem 2rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px var(--shadow);
+            text-align: center;
+        }
+
+        .microphone-icon {
+            font-size: 8rem;
+            margin: 2rem 0;
+            transition: all 0.3s;
+        }
+
+        .microphone-icon.recording {
+            color: #e74c3c;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .timer {
+            font-size: 3rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin: 2rem 0;
+            font-family: 'Courier New', monospace;
+        }
+
+        .record-btn {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            font-size: 3rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 10px 30px rgba(231, 76, 60, 0.3);
+        }
+
+        .record-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 15px 40px rgba(231, 76, 60, 0.5);
+        }
+
+        .record-btn.recording {
+            background: #c0392b;
+            animation: recordPulse 1.5s infinite;
+        }
+
+        @keyframes recordPulse {
+            0%, 100% { box-shadow: 0 10px 30px rgba(231, 76, 60, 0.3); }
+            50% { box-shadow: 0 10px 50px rgba(231, 76, 60, 0.8); }
+        }
+
+        .control-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin: 2rem 0;
+        }
+
+        .control-buttons button {
+            padding: 1rem 2rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1rem;
+        }
+
+        .control-buttons button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px var(--shadow);
+        }
+
+        .control-buttons button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .recordings-section {
+            margin-top: 3rem;
+        }
+
+        .recording-item {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 15px;
+            margin: 1rem 0;
+            box-shadow: 0 5px 15px var(--shadow);
+        }
+
+        .recording-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .recording-title {
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .recording-duration {
+            color: var(--text);
+            opacity: 0.7;
+        }
+
+        .audio-player {
+            width: 100%;
+            margin: 1rem 0;
+        }
+
+        .recording-actions {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: flex-end;
+        }
+
+        .recording-actions button {
+            padding: 0.5rem 1rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .waveform {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+            height: 60px;
+            margin: 2rem 0;
+        }
+
+        .waveform-bar {
+            width: 4px;
+            background: var(--primary);
+            border-radius: 2px;
+            transition: height 0.1s;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">🎤 Voice Recorder</div>
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="drawing.html">Drawing</a></li>
+            <li><a href="music.html">Music</a></li>
+            <li><a href="quiz.html">Quiz</a></li>
+            <li><a href="casino.html">Casino</a></li>
+            <li><a href="ru.html">RU</a></li>
+            <li><a href="index.html">EN</a></li>
+        </ul>
+        <button class="theme-toggle" id="themeToggle">🌙</button>
+    </nav>
+
+    <div class="voice-container">
+        <h1 style="text-align: center;">🎤 Voice Recorder</h1>
+
+        <div class="recorder-card">
+            <div class="microphone-icon" id="micIcon">🎤</div>
+
+            <div class="waveform" id="waveform"></div>
+
+            <div class="timer" id="timer">00:00</div>
+
+            <button class="record-btn" id="recordBtn" onclick="toggleRecording()">⏺️</button>
+
+            <div class="control-buttons">
+                <button onclick="pauseRecording()" id="pauseBtn" disabled>⏸️ Pause</button>
+                <button onclick="resumeRecording()" id="resumeBtn" disabled>▶️ Resume</button>
+                <button onclick="stopRecording()" id="stopBtn" disabled>⏹️ Stop</button>
+            </div>
+        </div>
+
+        <div class="recordings-section">
+            <h2>📼 My Recordings</h2>
+            <div id="recordingsList"></div>
+        </div>
+    </div>
+
+    <script>
+        // Theme Toggle
+        const themeToggle = document.getElementById('themeToggle');
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            themeToggle.textContent = document.body.classList.contains('dark-mode') ? '☀️' : '🌙';
+            localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+        });
+
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark-mode');
+            themeToggle.textContent = '☀️';
+        }
+
+        // Voice Recorder
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let isRecording = false;
+        let isPaused = false;
+        let startTime = 0;
+        let timerInterval = null;
+        let recordings = [];
+        let audioContext = null;
+        let analyser = null;
+        let animationId = null;
+
+        // Create waveform bars
+        const waveform = document.getElementById('waveform');
+        for (let i = 0; i < 20; i++) {
+            const bar = document.createElement('div');
+            bar.className = 'waveform-bar';
+            bar.style.height = '10px';
+            waveform.appendChild(bar);
+        }
+
+        async function toggleRecording() {
+            if (!isRecording) {
+                await startRecording();
+            } else {
+                stopRecording();
+            }
+        }
+
+        async function startRecording() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+                // Setup audio context for visualization
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                analyser = audioContext.createAnalyser();
+                const source = audioContext.createMediaStreamSource(stream);
+                source.connect(analyser);
+                analyser.fftSize = 64;
+
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+
+                mediaRecorder.ondataavailable = (event) => {
+                    audioChunks.push(event.data);
+                };
+
+                mediaRecorder.onstop = () => {
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                    saveRecording(audioBlob);
+                    stream.getTracks().forEach(track => track.stop());
+                };
+
+                mediaRecorder.start();
+                isRecording = true;
+                startTime = Date.now();
+                startTimer();
+                visualize();
+
+                document.getElementById('micIcon').classList.add('recording');
+                document.getElementById('recordBtn').classList.add('recording');
+                document.getElementById('recordBtn').textContent = '⏹️';
+                document.getElementById('pauseBtn').disabled = false;
+                document.getElementById('stopBtn').disabled = false;
+
+            } catch (err) {
+                console.error('Error accessing microphone:', err);
+                alert('❌ Could not access microphone. Please grant permission.');
+            }
+        }
+
+        function pauseRecording() {
+            if (mediaRecorder && mediaRecorder.state === 'recording') {
+                mediaRecorder.pause();
+                isPaused = true;
+                clearInterval(timerInterval);
+                cancelAnimationFrame(animationId);
+                document.getElementById('pauseBtn').disabled = true;
+                document.getElementById('resumeBtn').disabled = false;
+            }
+        }
+
+        function resumeRecording() {
+            if (mediaRecorder && mediaRecorder.state === 'paused') {
+                mediaRecorder.resume();
+                isPaused = false;
+                startTimer();
+                visualize();
+                document.getElementById('pauseBtn').disabled = false;
+                document.getElementById('resumeBtn').disabled = true;
+            }
+        }
+
+        function stopRecording() {
+            if (mediaRecorder) {
+                mediaRecorder.stop();
+                isRecording = false;
+                isPaused = false;
+                clearInterval(timerInterval);
+                cancelAnimationFrame(animationId);
+
+                document.getElementById('micIcon').classList.remove('recording');
+                document.getElementById('recordBtn').classList.remove('recording');
+                document.getElementById('recordBtn').textContent = '⏺️';
+                document.getElementById('pauseBtn').disabled = true;
+                document.getElementById('resumeBtn').disabled = true;
+                document.getElementById('stopBtn').disabled = true;
+                document.getElementById('timer').textContent = '00:00';
+
+                // Reset waveform
+                document.querySelectorAll('.waveform-bar').forEach(bar => {
+                    bar.style.height = '10px';
+                });
+            }
+        }
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                const elapsed = Date.now() - startTime;
+                const minutes = Math.floor(elapsed / 60000);
+                const seconds = Math.floor((elapsed % 60000) / 1000);
+                document.getElementById('timer').textContent =
+                    `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }, 1000);
+        }
+
+        function visualize() {
+            const bufferLength = analyser.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+            const bars = document.querySelectorAll('.waveform-bar');
+
+            function draw() {
+                if (!isRecording || isPaused) return;
+
+                analyser.getByteFrequencyData(dataArray);
+
+                bars.forEach((bar, i) => {
+                    const value = dataArray[i * 3] || 0;
+                    const height = (value / 255) * 50 + 10;
+                    bar.style.height = height + 'px';
+                });
+
+                animationId = requestAnimationFrame(draw);
+            }
+
+            draw();
+        }
+
+        function saveRecording(blob) {
+            const url = URL.createObjectURL(blob);
+            const timestamp = new Date().toLocaleString();
+            const duration = document.getElementById('timer').textContent;
+
+            recordings.push({
+                url: url,
+                blob: blob,
+                timestamp: timestamp,
+                duration: duration
+            });
+
+            renderRecordings();
+        }
+
+        function renderRecordings() {
+            const list = document.getElementById('recordingsList');
+            list.innerHTML = '';
+
+            if (recordings.length === 0) {
+                list.innerHTML = '<p style="text-align: center; opacity: 0.7;">No recordings yet</p>';
+                return;
+            }
+
+            recordings.forEach((recording, index) => {
+                const item = document.createElement('div');
+                item.className = 'recording-item';
+                item.innerHTML = `
+                    <div class="recording-header">
+                        <div>
+                            <div class="recording-title">Recording ${index + 1}</div>
+                            <div class="recording-duration">${recording.timestamp} • ${recording.duration}</div>
+                        </div>
+                    </div>
+                    <audio class="audio-player" controls src="${recording.url}"></audio>
+                    <div class="recording-actions">
+                        <button onclick="downloadRecording(${index})">💾 Download</button>
+                        <button onclick="shareRecording(${index})">🔗 Share</button>
+                        <button onclick="deleteRecording(${index})">🗑️ Delete</button>
+                    </div>
+                `;
+                list.appendChild(item);
+            });
+        }
+
+        function downloadRecording(index) {
+            const recording = recordings[index];
+            const a = document.createElement('a');
+            a.href = recording.url;
+            a.download = `voice-recording-${Date.now()}.webm`;
+            a.click();
+            alert('💾 Recording downloaded!');
+        }
+
+        function shareRecording(index) {
+            const recording = recordings[index];
+            if (navigator.share) {
+                const file = new File([recording.blob], 'recording.webm', { type: 'audio/webm' });
+                navigator.share({
+                    files: [file],
+                    title: 'Voice Recording',
+                    text: 'Check out my voice recording!'
+                }).catch(() => {
+                    alert('❌ Sharing not supported');
+                });
+            } else {
+                alert('❌ Sharing not supported on this browser');
+            }
+        }
+
+        function deleteRecording(index) {
+            if (confirm('Delete this recording?')) {
+                URL.revokeObjectURL(recordings[index].url);
+                recordings.splice(index, 1);
+                renderRecordings();
+            }
+        }
+
+        // Initialize
+        renderRecordings();
+    </script>
+</body>
+</html>

@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Screen Recorder - AllSite</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .recorder-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 2rem;
+        }
+
+        .recorder-layout {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .preview-panel {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px var(--shadow);
+        }
+
+        .preview-panel h3 {
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+        }
+
+        #videoPreview {
+            width: 100%;
+            border-radius: 10px;
+            background: #000;
+            min-height: 400px;
+        }
+
+        .controls-panel {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px var(--shadow);
+        }
+
+        .controls-panel h3 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .record-button {
+            width: 100%;
+            padding: 1.5rem;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1.2rem;
+            margin: 1rem 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .record-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px var(--shadow);
+        }
+
+        .record-button.recording {
+            background: #c0392b;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .control-button {
+            width: 100%;
+            padding: 1rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1rem;
+            margin: 0.5rem 0;
+        }
+
+        .control-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px var(--shadow);
+        }
+
+        .control-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .timer-display {
+            text-align: center;
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin: 1rem 0;
+            font-family: 'Courier New', monospace;
+        }
+
+        .option-group {
+            margin: 1.5rem 0;
+        }
+
+        .option-group label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 0.5rem 0;
+            cursor: pointer;
+        }
+
+        .option-group input[type="checkbox"],
+        .option-group input[type="radio"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .recordings-list {
+            margin-top: 2rem;
+        }
+
+        .recording-item {
+            background: var(--bg);
+            padding: 1rem;
+            border-radius: 10px;
+            margin: 0.5rem 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .recording-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .recording-actions button {
+            padding: 0.5rem 1rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 1000px) {
+            .recorder-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">🎥 Screen Recorder</div>
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="drawing.html">Drawing</a></li>
+            <li><a href="music.html">Music</a></li>
+            <li><a href="quiz.html">Quiz</a></li>
+            <li><a href="casino.html">Casino</a></li>
+            <li><a href="ru.html">RU</a></li>
+            <li><a href="index.html">EN</a></li>
+        </ul>
+        <button class="theme-toggle" id="themeToggle">🌙</button>
+    </nav>
+
+    <div class="recorder-container">
+        <h1 style="text-align: center;">🎥 Screen Recorder</h1>
+
+        <div class="recorder-layout">
+            <div class="preview-panel">
+                <h3>📺 Preview</h3>
+                <video id="videoPreview" autoplay muted></video>
+
+                <div class="timer-display" id="timerDisplay">00:00:00</div>
+
+                <button class="record-button" id="recordButton" onclick="toggleRecording()">
+                    <span id="recordIcon">⏺️</span>
+                    <span id="recordText">Start Recording</span>
+                </button>
+
+                <div class="recordings-list" id="recordingsList">
+                    <h3>📼 Recordings</h3>
+                </div>
+            </div>
+
+            <div class="controls-panel">
+                <h3>⚙️ Settings</h3>
+
+                <div class="option-group">
+                    <h4>Record Source:</h4>
+                    <label>
+                        <input type="radio" name="source" value="screen" checked onchange="updateSource()">
+                        🖥️ Screen
+                    </label>
+                    <label>
+                        <input type="radio" name="source" value="window" onchange="updateSource()">
+                        🪟 Window
+                    </label>
+                    <label>
+                        <input type="radio" name="source" value="tab" onchange="updateSource()">
+                        📑 Browser Tab
+                    </label>
+                </div>
+
+                <div class="option-group">
+                    <h4>Audio:</h4>
+                    <label>
+                        <input type="checkbox" id="systemAudio" checked>
+                        🔊 System Audio
+                    </label>
+                    <label>
+                        <input type="checkbox" id="micAudio">
+                        🎤 Microphone
+                    </label>
+                </div>
+
+                <div class="option-group">
+                    <h4>Quality:</h4>
+                    <label>
+                        <input type="radio" name="quality" value="720" checked>
+                        720p (HD)
+                    </label>
+                    <label>
+                        <input type="radio" name="quality" value="1080">
+                        1080p (Full HD)
+                    </label>
+                    <label>
+                        <input type="radio" name="quality" value="1440">
+                        1440p (2K)
+                    </label>
+                </div>
+
+                <h3 style="margin-top: 2rem;">🎬 Actions</h3>
+                <button class="control-button" onclick="pauseRecording()" id="pauseBtn" disabled>⏸️ Pause</button>
+                <button class="control-button" onclick="resumeRecording()" id="resumeBtn" disabled>▶️ Resume</button>
+                <button class="control-button" onclick="stopRecording()" id="stopBtn" disabled>⏹️ Stop</button>
+                <button class="control-button" onclick="clearRecordings()">🗑️ Clear All</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Theme Toggle
+        const themeToggle = document.getElementById('themeToggle');
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            themeToggle.textContent = document.body.classList.contains('dark-mode') ? '☀️' : '🌙';
+            localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+        });
+
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark-mode');
+            themeToggle.textContent = '☀️';
+        }
+
+        // Screen Recorder
+        let mediaRecorder = null;
+        let recordedChunks = [];
+        let stream = null;
+        let isRecording = false;
+        let isPaused = false;
+        let startTime = 0;
+        let timerInterval = null;
+        let recordings = [];
+
+        const videoPreview = document.getElementById('videoPreview');
+        const recordButton = document.getElementById('recordButton');
+        const timerDisplay = document.getElementById('timerDisplay');
+
+        async function updateSource() {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+            }
+
+            try {
+                const constraints = {
+                    video: {
+                        mediaSource: 'screen'
+                    },
+                    audio: document.getElementById('systemAudio').checked
+                };
+
+                stream = await navigator.mediaDevices.getDisplayMedia(constraints);
+                videoPreview.srcObject = stream;
+            } catch (err) {
+                console.error('Error accessing screen:', err);
+                alert('❌ Could not access screen. Please grant permission.');
+            }
+        }
+
+        async function toggleRecording() {
+            if (!isRecording) {
+                await startRecording();
+            } else {
+                stopRecording();
+            }
+        }
+
+        async function startRecording() {
+            try {
+                if (!stream) {
+                    await updateSource();
+                }
+
+                recordedChunks = [];
+                mediaRecorder = new MediaRecorder(stream, {
+                    mimeType: 'video/webm;codecs=vp9'
+                });
+
+                mediaRecorder.ondataavailable = (event) => {
+                    if (event.data.size > 0) {
+                        recordedChunks.push(event.data);
+                    }
+                };
+
+                mediaRecorder.onstop = () => {
+                    const blob = new Blob(recordedChunks, { type: 'video/webm' });
+                    saveRecording(blob);
+                };
+
+                mediaRecorder.start();
+                isRecording = true;
+                startTime = Date.now();
+                startTimer();
+
+                recordButton.classList.add('recording');
+                document.getElementById('recordIcon').textContent = '⏹️';
+                document.getElementById('recordText').textContent = 'Stop Recording';
+                document.getElementById('pauseBtn').disabled = false;
+                document.getElementById('stopBtn').disabled = false;
+
+            } catch (err) {
+                console.error('Error starting recording:', err);
+                alert('❌ Could not start recording. Please try again.');
+            }
+        }
+
+        function pauseRecording() {
+            if (mediaRecorder && mediaRecorder.state === 'recording') {
+                mediaRecorder.pause();
+                isPaused = true;
+                clearInterval(timerInterval);
+                document.getElementById('pauseBtn').disabled = true;
+                document.getElementById('resumeBtn').disabled = false;
+            }
+        }
+
+        function resumeRecording() {
+            if (mediaRecorder && mediaRecorder.state === 'paused') {
+                mediaRecorder.resume();
+                isPaused = false;
+                startTimer();
+                document.getElementById('pauseBtn').disabled = false;
+                document.getElementById('resumeBtn').disabled = true;
+            }
+        }
+
+        function stopRecording() {
+            if (mediaRecorder) {
+                mediaRecorder.stop();
+                isRecording = false;
+                isPaused = false;
+                clearInterval(timerInterval);
+
+                recordButton.classList.remove('recording');
+                document.getElementById('recordIcon').textContent = '⏺️';
+                document.getElementById('recordText').textContent = 'Start Recording';
+                document.getElementById('pauseBtn').disabled = true;
+                document.getElementById('resumeBtn').disabled = true;
+                document.getElementById('stopBtn').disabled = true;
+
+                timerDisplay.textContent = '00:00:00';
+            }
+        }
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                const elapsed = Date.now() - startTime;
+                const hours = Math.floor(elapsed / 3600000);
+                const minutes = Math.floor((elapsed % 3600000) / 60000);
+                const seconds = Math.floor((elapsed % 60000) / 1000);
+
+                timerDisplay.textContent =
+                    `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }, 1000);
+        }
+
+        function saveRecording(blob) {
+            const url = URL.createObjectURL(blob);
+            const timestamp = new Date().toLocaleString();
+
+            recordings.push({
+                url: url,
+                blob: blob,
+                timestamp: timestamp,
+                duration: timerDisplay.textContent
+            });
+
+            renderRecordings();
+        }
+
+        function renderRecordings() {
+            const list = document.getElementById('recordingsList');
+            list.innerHTML = '<h3>📼 Recordings</h3>';
+
+            recordings.forEach((recording, index) => {
+                const item = document.createElement('div');
+                item.className = 'recording-item';
+                item.innerHTML = `
+                    <div>
+                        <strong>Recording ${index + 1}</strong><br>
+                        <small>${recording.timestamp} (${recording.duration})</small>
+                    </div>
+                    <div class="recording-actions">
+                        <button onclick="playRecording(${index})">▶️</button>
+                        <button onclick="downloadRecording(${index})">💾</button>
+                        <button onclick="deleteRecording(${index})">🗑️</button>
+                    </div>
+                `;
+                list.appendChild(item);
+            });
+        }
+
+        function playRecording(index) {
+            const recording = recordings[index];
+            const video = document.createElement('video');
+            video.src = recording.url;
+            video.controls = true;
+            video.style.width = '100%';
+            video.style.borderRadius = '10px';
+            video.style.marginTop = '1rem';
+
+            const modal = document.createElement('div');
+            modal.style.position = 'fixed';
+            modal.style.top = '0';
+            modal.style.left = '0';
+            modal.style.width = '100%';
+            modal.style.height = '100%';
+            modal.style.background = 'rgba(0,0,0,0.9)';
+            modal.style.display = 'flex';
+            modal.style.alignItems = 'center';
+            modal.style.justifyContent = 'center';
+            modal.style.zIndex = '10000';
+            modal.style.padding = '2rem';
+
+            const container = document.createElement('div');
+            container.style.maxWidth = '800px';
+            container.style.width = '100%';
+
+            const closeBtn = document.createElement('button');
+            closeBtn.textContent = '✕ Close';
+            closeBtn.style.padding = '1rem 2rem';
+            closeBtn.style.background = '#e74c3c';
+            closeBtn.style.color = 'white';
+            closeBtn.style.border = 'none';
+            closeBtn.style.borderRadius = '10px';
+            closeBtn.style.cursor = 'pointer';
+            closeBtn.style.marginTop = '1rem';
+            closeBtn.style.width = '100%';
+            closeBtn.onclick = () => document.body.removeChild(modal);
+
+            container.appendChild(video);
+            container.appendChild(closeBtn);
+            modal.appendChild(container);
+            document.body.appendChild(modal);
+
+            video.play();
+        }
+
+        function downloadRecording(index) {
+            const recording = recordings[index];
+            const a = document.createElement('a');
+            a.href = recording.url;
+            a.download = `recording-${Date.now()}.webm`;
+            a.click();
+            alert('💾 Recording downloaded!');
+        }
+
+        function deleteRecording(index) {
+            if (confirm('Delete this recording?')) {
+                URL.revokeObjectURL(recordings[index].url);
+                recordings.splice(index, 1);
+                renderRecordings();
+            }
+        }
+
+        function clearRecordings() {
+            if (confirm('Delete all recordings?')) {
+                recordings.forEach(r => URL.revokeObjectURL(r.url));
+                recordings = [];
+                renderRecordings();
+            }
+        }
+
+        // Initialize
+        updateSource();
+    </script>
+</body>
+</html>
