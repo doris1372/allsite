@@ -12,6 +12,25 @@ if (localStorage.getItem('theme') === 'dark') {
     themeToggle.textContent = '☀️';
 }
 
+// Mobile Menu Toggle
+function toggleMobileMenu() {
+    const navLinks = document.getElementById('navLinks');
+    navLinks.classList.toggle('active');
+}
+
+// Dropdown Toggle for Mobile
+document.addEventListener('DOMContentLoaded', () => {
+    const dropdowns = document.querySelectorAll('.dropdown');
+    dropdowns.forEach(dropdown => {
+        dropdown.addEventListener('click', (e) => {
+            if (window.innerWidth <= 1200) {
+                e.preventDefault();
+                dropdown.classList.toggle('active');
+            }
+        });
+    });
+});
+
 // Notes
 function saveNotes() {
     const notes = document.getElementById('notes').value;

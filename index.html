@@ -10,16 +10,55 @@
 <body>
     <nav class="navbar">
         <div class="logo">🌐 AllSite</div>
-        <ul class="nav-links">
-            <li><a href="#home">Home</a></li>
-            <li><a href="#tools">Tools</a></li>
-            <li><a href="#games">Games</a></li>
-            <li><a href="drawing.html">Drawing</a></li>
-            <li><a href="music.html">Music</a></li>
-            <li><a href="quiz.html">Quiz</a></li>
-            <li><a href="casino.html">Casino</a></li>
-            <li><a href="ru.html">RU</a></li>
-            <li><a href="index.html">EN</a></li>
+        <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">☰</button>
+        <ul class="nav-links" id="navLinks">
+            <li><a href="index.html">🏠 Home</a></li>
+            <li class="dropdown">
+                <a href="#" class="dropbtn">🎨 Creative ▼</a>
+                <div class="dropdown-content">
+                    <a href="drawing.html">Drawing</a>
+                    <a href="pixelart.html">Pixel Art</a>
+                    <a href="photoeditor.html">Photo Editor</a>
+                    <a href="memegenerator.html">Meme Generator</a>
+                </div>
+            </li>
+            <li class="dropdown">
+                <a href="#" class="dropbtn">🎵 Media ▼</a>
+                <div class="dropdown-content">
+                    <a href="music.html">Music Studio</a>
+                    <a href="videoeditor.html">Video Editor</a>
+                    <a href="voicerecorder.html">Voice Recorder</a>
+                    <a href="screenrecorder.html">Screen Recorder</a>
+                </div>
+            </li>
+            <li class="dropdown">
+                <a href="#" class="dropbtn">🎮 Games ▼</a>
+                <div class="dropdown-content">
+                    <a href="casino.html">Casino</a>
+                    <a href="quiz.html">Quiz</a>
+                    <a href="maze.html">Maze</a>
+                    <a href="typing.html">Typing Test</a>
+                </div>
+            </li>
+            <li class="dropdown">
+                <a href="#" class="dropbtn">💻 Dev ▼</a>
+                <div class="dropdown-content">
+                    <a href="codeplayground.html">Code Playground</a>
+                    <a href="markdown.html">Markdown Editor</a>
+                    <a href="qrcode.html">QR Generator</a>
+                </div>
+            </li>
+            <li class="dropdown">
+                <a href="#" class="dropbtn">🔧 Tools ▼</a>
+                <div class="dropdown-content">
+                    <a href="weather.html">Weather</a>
+                    <a href="pomodoro.html">Pomodoro</a>
+                    <a href="fileconverter.html">File Converter</a>
+                    <a href="chatroom.html">Chat Room</a>
+                </div>
+            </li>
+            <li><a href="themedesigner.html" class="theme-designer-link">🎨 Themes</a></li>
+            <li><a href="ru.html">🇷🇺 RU</a></li>
         </ul>
         <button class="theme-toggle" id="themeToggle">🌙</button>
     </nav>
