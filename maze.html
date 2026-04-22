@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maze Game - AllSite</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .maze-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 2rem;
+        }
+
+        #mazeCanvas {
+            border: 3px solid var(--primary);
+            border-radius: 15px;
+            display: block;
+            margin: 2rem auto;
+            background: var(--card-bg);
+            box-shadow: 0 10px 30px var(--shadow);
+        }
+
+        .maze-controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .control-card {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px var(--shadow);
+        }
+
+        .control-card h3 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .difficulty-btns {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;
+        }
+
+        .diff-btn {
+            padding: 1rem;
+            border: 2px solid var(--primary);
+            background: var(--bg);
+            color: var(--text);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+
+        .diff-btn:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .diff-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .game-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .stat-display {
+            background: var(--bg);
+            padding: 1rem;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+
+        .controls-info {
+            background: var(--bg);
+            padding: 1rem;
+            border-radius: 10px;
+            margin-top: 1rem;
+        }
+
+        .key-hint {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            padding: 0.3rem 0.6rem;
+            border-radius: 5px;
+            margin: 0.2rem;
+            font-weight: bold;
+        }
+
+        .victory-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .victory-modal.active {
+            display: flex;
+        }
+
+        .victory-content {
+            background: var(--card-bg);
+            padding: 3rem;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 500px;
+            animation: scaleIn 0.5s;
+        }
+
+        @keyframes scaleIn {
+            from { transform: scale(0); }
+            to { transform: scale(1); }
+        }
+
+        .victory-icon {
+            font-size: 5rem;
+            margin-bottom: 1rem;
+        }
+
+        .minimap {
+            border: 2px solid var(--primary);
+            border-radius: 10px;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">🎮 Maze Game</div>
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="drawing.html">Drawing</a></li>
+            <li><a href="music.html">Music</a></li>
+            <li><a href="quiz.html">Quiz</a></li>
+            <li><a href="maze.html">Maze</a></li>
+        </ul>
+        <button class="theme-toggle" id="themeToggle">🌙</button>
+    </nav>
+
+    <div class="maze-container">
+        <h1 style="text-align: center;">🎮 Maze Game</h1>
+
+        <canvas id="mazeCanvas" width="800" height="800"></canvas>
+
+        <div class="maze-controls">
+            <div class="control-card">
+                <h3>🎯 Difficulty</h3>
+                <div class="difficulty-btns">
+                    <button class="diff-btn" onclick="setDifficulty('easy')">Easy</button>
+                    <button class="diff-btn active" onclick="setDifficulty('medium')">Medium</button>
+                    <button class="diff-btn" onclick="setDifficulty('hard')">Hard</button>
+                </div>
+                <button onclick="generateNewMaze()" style="width: 100%; margin-top: 1rem;">🔄 New Maze</button>
+            </div>
+
+            <div class="control-card">
+                <h3>📊 Stats</h3>
+                <div class="game-stats">
+                    <div class="stat-display">
+                        <div class="stat-value" id="timeValue">0:00</div>
+                        <div class="stat-label">Time</div>
+                    </div>
+                    <div class="stat-display">
+                        <div class="stat-value" id="movesValue">0</div>
+                        <div class="stat-label">Moves</div>
+                    </div>
+                </div>
+                <div class="controls-info">
+                    <strong>Controls:</strong><br>
+                    <span class="key-hint">↑</span>
+                    <span class="key-hint">↓</span>
+                    <span class="key-hint">←</span>
+                    <span class="key-hint">→</span>
+                    or
+                    <span class="key-hint">W</span>
+                    <span class="key-hint">A</span>
+                    <span class="key-hint">S</span>
+                    <span class="key-hint">D</span>
+                </div>
+            </div>
+
+            <div class="control-card">
+                <h3>🗺️ Mini Map</h3>
+                <canvas id="minimap" class="minimap" width="200" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="victory-modal" id="victoryModal">
+        <div class="victory-content">
+            <div class="victory-icon">🎉</div>
+            <h2>Congratulations!</h2>
+            <p>You completed the maze!</p>
+            <div style="margin: 2rem 0;">
+                <div style="font-size: 1.5rem; color: var(--primary);">
+                    Time: <strong id="finalTime">0:00</strong>
+                </div>
+                <div style="font-size: 1.5rem; color: var(--secondary);">
+                    Moves: <strong id="finalMoves">0</strong>
+                </div>
+            </div>
+            <button onclick="closeVictory()" style="margin-right: 0.5rem;">🔄 New Game</button>
+            <button onclick="closeModal()">✖️ Close</button>
+        </div>
+    </div>
+
+    <script>
+        // Theme Toggle
+        const themeToggle = document.getElementById('themeToggle');
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            themeToggle.textContent = document.body.classList.contains('dark-mode') ? '☀️' : '🌙';
+        });
+
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark-mode');
+            themeToggle.textContent = '☀️';
+        }
+
+        // Maze Game
+        const canvas = document.getElementById('mazeCanvas');
+        const ctx = canvas.getContext('2d');
+        const minimap = document.getElementById('minimap');
+        const minimapCtx = minimap.getContext('2d');
+
+        let mazeSize = 20;
+        let cellSize = canvas.width / mazeSize;
+        let maze = [];
+        let player = { x: 0, y: 0 };
+        let goal = { x: mazeSize - 1, y: mazeSize - 1 };
+        let moves = 0;
+        let startTime = Date.now();
+        let timerInterval;
+        let difficulty = 'medium';
+
+        class Cell {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.walls = { top: true, right: true, bottom: true, left: true };
+                this.visited = false;
+            }
+        }
+
+        function initMaze() {
+            maze = [];
+            for (let y = 0; y < mazeSize; y++) {
+                maze[y] = [];
+                for (let x = 0; x < mazeSize; x++) {
+                    maze[y][x] = new Cell(x, y);
+                }
+            }
+        }
+
+        function generateMaze() {
+            initMaze();
+            const stack = [];
+            let current = maze[0][0];
+            current.visited = true;
+
+            while (true) {
+                const neighbors = getUnvisitedNeighbors(current);
+
+                if (neighbors.length > 0) {
+                    const next = neighbors[Math.floor(Math.random() * neighbors.length)];
+                    stack.push(current);
+                    removeWall(current, next);
+                    next.visited = true;
+                    current = next;
+                } else if (stack.length > 0) {
+                    current = stack.pop();
+                } else {
+                    break;
+                }
+            }
+        }
+
+        function getUnvisitedNeighbors(cell) {
+            const neighbors = [];
+            const { x, y } = cell;
+
+            if (y > 0 && !maze[y - 1][x].visited) neighbors.push(maze[y - 1][x]);
+            if (x < mazeSize - 1 && !maze[y][x + 1].visited) neighbors.push(maze[y][x + 1]);
+            if (y < mazeSize - 1 && !maze[y + 1][x].visited) neighbors.push(maze[y + 1][x]);
+            if (x > 0 && !maze[y][x - 1].visited) neighbors.push(maze[y][x - 1]);
+
+            return neighbors;
+        }
+
+        function removeWall(current, next) {
+            const dx = next.x - current.x;
+            const dy = next.y - current.y;
+
+            if (dx === 1) {
+                current.walls.right = false;
+                next.walls.left = false;
+            } else if (dx === -1) {
+                current.walls.left = false;
+                next.walls.right = false;
+            } else if (dy === 1) {
+                current.walls.bottom = false;
+                next.walls.top = false;
+            } else if (dy === -1) {
+                current.walls.top = false;
+                next.walls.bottom = false;
+            }
+        }
+
+        function drawMaze() {
+            ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--bg');
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.strokeStyle = getComputedStyle(document.body).getPropertyValue('--primary');
+            ctx.lineWidth = 3;
+
+            for (let y = 0; y < mazeSize; y++) {
+                for (let x = 0; x < mazeSize; x++) {
+                    const cell = maze[y][x];
+                    const px = x * cellSize;
+                    const py = y * cellSize;
+
+                    ctx.beginPath();
+                    if (cell.walls.top) {
+                        ctx.moveTo(px, py);
+                        ctx.lineTo(px + cellSize, py);
+                    }
+                    if (cell.walls.right) {
+                        ctx.moveTo(px + cellSize, py);
+                        ctx.lineTo(px + cellSize, py + cellSize);
+                    }
+                    if (cell.walls.bottom) {
+                        ctx.moveTo(px, py + cellSize);
+                        ctx.lineTo(px + cellSize, py + cellSize);
+                    }
+                    if (cell.walls.left) {
+                        ctx.moveTo(px, py);
+                        ctx.lineTo(px, py + cellSize);
+                    }
+                    ctx.stroke();
+                }
+            }
+
+            // Draw goal
+            ctx.fillStyle = '#2ecc71';
+            ctx.fillRect(goal.x * cellSize + 5, goal.y * cellSize + 5, cellSize - 10, cellSize - 10);
+
+            // Draw player
+            ctx.fillStyle = '#3498db';
+            ctx.beginPath();
+            ctx.arc(
+                player.x * cellSize + cellSize / 2,
+                player.y * cellSize + cellSize / 2,
+                cellSize / 3,
+                0,
+                Math.PI * 2
+            );
+            ctx.fill();
+
+            drawMinimap();
+        }
+
+        function drawMinimap() {
+            const scale = minimap.width / canvas.width;
+            minimapCtx.fillStyle = '#000';
+            minimapCtx.fillRect(0, 0, minimap.width, minimap.height);
+
+            minimapCtx.strokeStyle = '#3498db';
+            minimapCtx.lineWidth = 1;
+
+            for (let y = 0; y < mazeSize; y++) {
+                for (let x = 0; x < mazeSize; x++) {
+                    const cell = maze[y][x];
+                    const px = x * cellSize * scale;
+                    const py = y * cellSize * scale;
+                    const size = cellSize * scale;
+
+                    minimapCtx.beginPath();
+                    if (cell.walls.top) {
+                        minimapCtx.moveTo(px, py);
+                        minimapCtx.lineTo(px + size, py);
+                    }
+                    if (cell.walls.right) {
+                        minimapCtx.moveTo(px + size, py);
+                        minimapCtx.lineTo(px + size, py + size);
+                    }
+                    minimapCtx.stroke();
+                }
+            }
+
+            // Draw goal on minimap
+            minimapCtx.fillStyle = '#2ecc71';
+            minimapCtx.fillRect(goal.x * cellSize * scale, goal.y * cellSize * scale, cellSize * scale, cellSize * scale);
+
+            // Draw player on minimap
+            minimapCtx.fillStyle = '#3498db';
+            minimapCtx.fillRect(player.x * cellSize * scale, player.y * cellSize * scale, cellSize * scale, cellSize * scale);
+        }
+
+        function movePlayer(dx, dy) {
+            const newX = player.x + dx;
+            const newY = player.y + dy;
+
+            if (newX < 0 || newX >= mazeSize || newY < 0 || newY >= mazeSize) return;
+
+            const current = maze[player.y][player.x];
+
+            if (dx === 1 && current.walls.right) return;
+            if (dx === -1 && current.walls.left) return;
+            if (dy === 1 && current.walls.bottom) return;
+            if (dy === -1 && current.walls.top) return;
+
+            player.x = newX;
+            player.y = newY;
+            moves++;
+            document.getElementById('movesValue').textContent = moves;
+
+            if (player.x === goal.x && player.y === goal.y) {
+                victory();
+            }
+
+            drawMaze();
+        }
+
+        function victory() {
+            clearInterval(timerInterval);
+            document.getElementById('finalTime').textContent = document.getElementById('timeValue').textContent;
+            document.getElementById('finalMoves').textContent = moves;
+            document.getElementById('victoryModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('victoryModal').classList.remove('active');
+        }
+
+        function closeVictory() {
+            closeModal();
+            generateNewMaze();
+        }
+
+        function updateTimer() {
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            const minutes = Math.floor(elapsed / 60);
+            const seconds = elapsed % 60;
+            document.getElementById('timeValue').textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function setDifficulty(diff) {
+            difficulty = diff;
+            document.querySelectorAll('.diff-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            switch(diff) {
+                case 'easy':
+                    mazeSize = 15;
+                    break;
+                case 'medium':
+                    mazeSize = 20;
+                    break;
+                case 'hard':
+                    mazeSize = 30;
+                    break;
+            }
+
+            cellSize = canvas.width / mazeSize;
+            generateNewMaze();
+        }
+
+        function generateNewMaze() {
+            player = { x: 0, y: 0 };
+            goal = { x: mazeSize - 1, y: mazeSize - 1 };
+            moves = 0;
+            startTime = Date.now();
+            document.getElementById('movesValue').textContent = moves;
+
+            clearInterval(timerInterval);
+            timerInterval = setInterval(updateTimer, 1000);
+
+            generateMaze();
+            drawMaze();
+        }
+
+        // Keyboard controls
+        document.addEventListener('keydown', (e) => {
+            switch(e.key) {
+                case 'ArrowUp':
+                case 'w':
+                case 'W':
+                    movePlayer(0, -1);
+                    break;
+                case 'ArrowDown':
+                case 's':
+                case 'S':
+                    movePlayer(0, 1);
+                    break;
+                case 'ArrowLeft':
+                case 'a':
+                case 'A':
+                    movePlayer(-1, 0);
+                    break;
+                case 'ArrowRight':
+                case 'd':
+                case 'D':
+                    movePlayer(1, 0);
+                    break;
+            }
+        });
+
+        // Initialize
+        generateNewMaze();
+    </script>
+</body>
+</html>
