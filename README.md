@@ -1,6 +1,6 @@
 # AllSite - Everything in One Place 🌐
 
-A comprehensive web application featuring 50+ tools, games, and interactive experiences!
+A comprehensive web application featuring 80+ tools, games, and interactive experiences!
 
 ## 🚀 Live Demo
 
@@ -8,7 +8,7 @@ Visit: https://doris1372.github.io/allsite/
 
 ## ✨ Features Overview
 
-### 🛠️ Productivity Tools (Main Page)
+### 🛠️ Productivity Tools
 - **Notes** - Save and manage notes with local storage
 - **Timer & Stopwatch** - With lap functionality
 - **Calculator** - Full-featured calculator
@@ -21,6 +21,8 @@ Visit: https://doris1372.github.io/allsite/
 - **Text Counter** - Characters, words, lines
 - **URL Shortener** - Mock URL shortening
 - **Currency Converter** - Multi-currency support
+- **Pomodoro Timer** - Focus timer with stats tracking
+- **Markdown Editor** - Live preview and export
 
 ### 🎮 Games
 - **Snake Game** - High score tracking
@@ -31,26 +33,37 @@ Visit: https://doris1372.github.io/allsite/
 - **Reaction Test** - Measure reaction time
 - **Maze Game** - Procedural generation, 3 difficulty levels
 - **Quiz Master** - 8 categories, 80 questions, leaderboard
+- **Casino** - Slots, Roulette, Dice, Blackjack
 
 ### 💬 Communication
-- **Chat Room** - Echo bot with message history
+- **Chat Room** - Real-time messaging with emoji picker
 - **AI Chat** - Intelligent chatbot with context-aware responses
 
 ### 🎵 Media & Creative Tools
 - **Music Studio** - Virtual piano, drum machine, step sequencer, metronome
 - **Drawing Board** - Multiple tools, color palette, save/load
+- **Pixel Art Editor** - 7 tools, flood fill, undo/redo, gallery
+- **Photo Editor** - Filters, adjustments, rotation, flip
+- **Video Editor** - Effects, trim, speed control, frame capture
+- **Meme Generator** - 8 templates, custom text, image upload
 - **Audio Player** - Play audio files
 - **Video Player** - Play video files
-- **Image Editor** - Filters and download
 - **Webcam** - Photo capture
 
 ### 💻 Development Tools
+- **Code Playground** - HTML/CSS/JS live preview with 8 templates
+- **Markdown Editor** - Live preview and HTML export
 - **Code Editor** - Multi-language with save/load
-- **JavaScript Execution** - Run code in browser
 
-### 🎨 Visual & Interactive
+### 🎨 Design & Visual Tools
+- **Theme Designer** - 20 amazing preset themes with customization
 - **3D Viewer** - 6 shapes, rotation, animations, wireframe mode
 - **Particle Simulator** - 8 presets, physics simulation
+- **QR Code Generator** - Text, URL, email, phone, SMS, WiFi, vCard
+
+### 🔧 Utilities
+- **Weather App** - 7-day forecast with city search
+- **File Converter** - Image, document, audio, video conversion
 - **Typing Speed Test** - WPM tracking, accuracy, leaderboard
 
 ### 💰 Finance Tools
@@ -58,18 +71,16 @@ Visit: https://doris1372.github.io/allsite/
 - **Investment Calculator** - ROI projections
 - **Tip Calculator** - Split bills
 
-### 🌤️ Information
-- **Weather Dashboard** - Mock weather data
-- **World Clock** - Real-time timezone display
-
 ## 📊 Statistics
 
-- **50+** Interactive features
-- **10** Dedicated pages
+- **80+** Interactive features
+- **25+** Dedicated pages
+- **20** Theme presets
 - **8** Quiz categories with 80 questions
+- **8** Code playground templates
 - **6** 3D shapes
 - **8** Particle effects
-- **3** Difficulty levels in games
+- **4** Casino games
 - **100%** Free and open source
 
 ## 🎨 Design Features
@@ -92,14 +103,28 @@ Visit: https://doris1372.github.io/allsite/
 ## 📱 Pages
 
 1. **index.html** - Main hub with 30+ tools
-2. **drawing.html** - Drawing board
-3. **music.html** - Music studio
-4. **quiz.html** - Quiz game
-5. **3d.html** - 3D shape viewer
-6. **particles.html** - Particle simulator
-7. **aichat.html** - AI chatbot
-8. **maze.html** - Maze game
-9. **typing.html** - Typing speed test
+2. **ru.html** - Russian version of main page
+3. **drawing.html** - Drawing board
+4. **music.html** - Music studio
+5. **quiz.html** - Quiz game
+6. **casino.html** - Casino games (Slots, Roulette, Dice, Blackjack)
+7. **3d.html** - 3D shape viewer
+8. **particles.html** - Particle simulator
+9. **aichat.html** - AI chatbot
+10. **maze.html** - Maze game
+11. **typing.html** - Typing speed test
+12. **pixelart.html** - Pixel art editor
+13. **weather.html** - Weather forecast app
+14. **photoeditor.html** - Photo editor with filters
+15. **codeplayground.html** - HTML/CSS/JS playground
+16. **markdown.html** - Markdown editor
+17. **pomodoro.html** - Pomodoro timer
+18. **themedesigner.html** - Theme designer with 20 presets
+19. **videoeditor.html** - Video editor
+20. **memegenerator.html** - Meme generator
+21. **qrcode.html** - QR code generator
+22. **chatroom.html** - Chat room
+23. **fileconverter.html** - File converter
 
 ## 🚀 Getting Started
 
