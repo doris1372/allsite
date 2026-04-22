@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Photo Editor - AllSite</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .editor-container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 2rem;
+        }
+
+        .editor-layout {
+            display: grid;
+            grid-template-columns: 250px 1fr 250px;
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .panel {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px var(--shadow);
+        }
+
+        .panel h3 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .canvas-area {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 600px;
+        }
+
+        #editorCanvas {
+            max-width: 100%;
+            max-height: 600px;
+            border: 2px solid var(--primary);
+            border-radius: 10px;
+            box-shadow: 0 10px 30px var(--shadow);
+        }
+
+        .tool-button {
+            width: 100%;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            background: var(--bg);
+            border: 2px solid var(--primary);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .tool-button:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateX(5px);
+        }
+
+        .slider-control {
+            margin: 1rem 0;
+        }
+
+        .slider-control label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+
+        .slider-control input[type="range"] {
+            width: 100%;
+        }
+
+        .slider-value {
+            text-align: center;
+            color: var(--primary);
+            font-weight: bold;
+            margin-top: 0.5rem;
+        }
+
+        .filter-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+
+        .filter-btn {
+            padding: 0.8rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+
+        .filter-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px var(--shadow);
+        }
+
+        .upload-area {
+            border: 3px dashed var(--primary);
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 1rem 0;
+        }
+
+        .upload-area:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .upload-area input {
+            display: none;
+        }
+
+        @media (max-width: 1200px) {
+            .editor-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">📸 Photo Editor</div>
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="drawing.html">Drawing</a></li>
+            <li><a href="music.html">Music</a></li>
+            <li><a href="quiz.html">Quiz</a></li>
+            <li><a href="casino.html">Casino</a></li>
+            <li><a href="ru.html">RU</a></li>
+            <li><a href="index.html">EN</a></li>
+        </ul>
+        <button class="theme-toggle" id="themeToggle">🌙</button>
+    </nav>
+
+    <div class="editor-container">
+        <h1 style="text-align: center;">📸 Photo Editor</h1>
+
+        <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+            <input type="file" id="fileInput" accept="image/*" onchange="loadImage(event)">
+            <h2>📁 Click to Upload Image</h2>
+            <p>or drag and drop</p>
+        </div>
+
+        <div class="editor-layout">
+            <div class="panel">
+                <h3>🎨 Adjustments</h3>
+
+                <div class="slider-control">
+                    <label>Brightness</label>
+                    <input type="range" id="brightness" min="0" max="200" value="100" oninput="applyFilters()">
+                    <div class="slider-value" id="brightnessValue">100%</div>
+                </div>
+
+                <div class="slider-control">
+                    <label>Contrast</label>
+                    <input type="range" id="contrast" min="0" max="200" value="100" oninput="applyFilters()">
+                    <div class="slider-value" id="contrastValue">100%</div>
+                </div>
+
+                <div class="slider-control">
+                    <label>Saturation</label>
+                    <input type="range" id="saturation" min="0" max="200" value="100" oninput="applyFilters()">
+                    <div class="slider-value" id="saturationValue">100%</div>
+                </div>
+
+                <div class="slider-control">
+                    <label>Blur</label>
+                    <input type="range" id="blur" min="0" max="20" value="0" oninput="applyFilters()">
+                    <div class="slider-value" id="blurValue">0px</div>
+                </div>
+
+                <div class="slider-control">
+                    <label>Hue Rotate</label>
+                    <input type="range" id="hue" min="0" max="360" value="0" oninput="applyFilters()">
+                    <div class="slider-value" id="hueValue">0°</div>
+                </div>
+
+                <div class="slider-control">
+                    <label>Opacity</label>
+                    <input type="range" id="opacity" min="0" max="100" value="100" oninput="applyFilters()">
+                    <div class="slider-value" id="opacityValue">100%</div>
+                </div>
+            </div>
+
+            <div>
+                <div class="canvas-area">
+                    <canvas id="editorCanvas"></canvas>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h3>🎭 Filters</h3>
+                <div class="filter-grid">
+                    <button class="filter-btn" onclick="applyPreset('grayscale')">⚫ Grayscale</button>
+                    <button class="filter-btn" onclick="applyPreset('sepia')">🟤 Sepia</button>
+                    <button class="filter-btn" onclick="applyPreset('invert')">🔄 Invert</button>
+                    <button class="filter-btn" onclick="applyPreset('vintage')">📷 Vintage</button>
+                    <button class="filter-btn" onclick="applyPreset('cool')">❄️ Cool</button>
+                    <button class="filter-btn" onclick="applyPreset('warm')">🔥 Warm</button>
+                    <button class="filter-btn" onclick="applyPreset('dramatic')">🎬 Dramatic</button>
+                    <button class="filter-btn" onclick="applyPreset('vibrant')">🌈 Vibrant</button>
+                </div>
+
+                <h3 style="margin-top: 2rem;">🔧 Tools</h3>
+                <button class="tool-button" onclick="rotateImage(90)">🔄 Rotate Right</button>
+                <button class="tool-button" onclick="rotateImage(-90)">🔄 Rotate Left</button>
+                <button class="tool-button" onclick="flipImage('horizontal')">↔️ Flip Horizontal</button>
+                <button class="tool-button" onclick="flipImage('vertical')">↕️ Flip Vertical</button>
+                <button class="tool-button" onclick="resetFilters()">↩️ Reset All</button>
+                <button class="tool-button" onclick="downloadImage()">💾 Download</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Theme Toggle
+        const themeToggle = document.getElementById('themeToggle');
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            themeToggle.textContent = document.body.classList.contains('dark-mode') ? '☀️' : '🌙';
+            localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+        });
+
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark-mode');
+            themeToggle.textContent = '☀️';
+        }
+
+        // Photo Editor
+        const canvas = document.getElementById('editorCanvas');
+        const ctx = canvas.getContext('2d');
+        let originalImage = null;
+        let currentRotation = 0;
+        let flipH = 1;
+        let flipV = 1;
+
+        // Drag and drop
+        const uploadArea = document.querySelector('.upload-area');
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.style.background = 'var(--primary)';
+            uploadArea.style.color = 'white';
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.style.background = '';
+            uploadArea.style.color = '';
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.style.background = '';
+            uploadArea.style.color = '';
+            const file = e.dataTransfer.files[0];
+            if (file && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        originalImage = img;
+                        resetFilters();
+                    };
+                    img.src = event.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        function loadImage(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        originalImage = img;
+                        resetFilters();
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function applyFilters() {
+            if (!originalImage) return;
+
+            const brightness = document.getElementById('brightness').value;
+            const contrast = document.getElementById('contrast').value;
+            const saturation = document.getElementById('saturation').value;
+            const blur = document.getElementById('blur').value;
+            const hue = document.getElementById('hue').value;
+            const opacity = document.getElementById('opacity').value;
+
+            document.getElementById('brightnessValue').textContent = brightness + '%';
+            document.getElementById('contrastValue').textContent = contrast + '%';
+            document.getElementById('saturationValue').textContent = saturation + '%';
+            document.getElementById('blurValue').textContent = blur + 'px';
+            document.getElementById('hueValue').textContent = hue + '°';
+            document.getElementById('opacityValue').textContent = opacity + '%';
+
+            canvas.width = originalImage.width;
+            canvas.height = originalImage.height;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.save();
+
+            ctx.translate(canvas.width / 2, canvas.height / 2);
+            ctx.rotate(currentRotation * Math.PI / 180);
+            ctx.scale(flipH, flipV);
+            ctx.translate(-canvas.width / 2, -canvas.height / 2);
+
+            ctx.filter = `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturation}%) blur(${blur}px) hue-rotate(${hue}deg) opacity(${opacity}%)`;
+            ctx.drawImage(originalImage, 0, 0);
+
+            ctx.restore();
+        }
+
+        function applyPreset(preset) {
+            if (!originalImage) return;
+
+            const presets = {
+                grayscale: { brightness: 100, contrast: 100, saturation: 0, blur: 0, hue: 0, opacity: 100 },
+                sepia: { brightness: 110, contrast: 90, saturation: 80, blur: 0, hue: 20, opacity: 100 },
+                invert: { brightness: 100, contrast: 100, saturation: 100, blur: 0, hue: 180, opacity: 100 },
+                vintage: { brightness: 110, contrast: 85, saturation: 70, blur: 1, hue: 30, opacity: 95 },
+                cool: { brightness: 105, contrast: 110, saturation: 120, blur: 0, hue: 200, opacity: 100 },
+                warm: { brightness: 110, contrast: 105, saturation: 130, blur: 0, hue: 20, opacity: 100 },
+                dramatic: { brightness: 90, contrast: 150, saturation: 110, blur: 0, hue: 0, opacity: 100 },
+                vibrant: { brightness: 110, contrast: 120, saturation: 180, blur: 0, hue: 0, opacity: 100 }
+            };
+
+            const p = presets[preset];
+            document.getElementById('brightness').value = p.brightness;
+            document.getElementById('contrast').value = p.contrast;
+            document.getElementById('saturation').value = p.saturation;
+            document.getElementById('blur').value = p.blur;
+            document.getElementById('hue').value = p.hue;
+            document.getElementById('opacity').value = p.opacity;
+
+            applyFilters();
+        }
+
+        function rotateImage(degrees) {
+            if (!originalImage) return;
+            currentRotation = (currentRotation + degrees) % 360;
+            applyFilters();
+        }
+
+        function flipImage(direction) {
+            if (!originalImage) return;
+            if (direction === 'horizontal') {
+                flipH *= -1;
+            } else {
+                flipV *= -1;
+            }
+            applyFilters();
+        }
+
+        function resetFilters() {
+            document.getElementById('brightness').value = 100;
+            document.getElementById('contrast').value = 100;
+            document.getElementById('saturation').value = 100;
+            document.getElementById('blur').value = 0;
+            document.getElementById('hue').value = 0;
+            document.getElementById('opacity').value = 100;
+            currentRotation = 0;
+            flipH = 1;
+            flipV = 1;
+            applyFilters();
+        }
+
+        function downloadImage() {
+            if (!originalImage) return;
+            const link = document.createElement('a');
+            link.download = `edited-photo-${Date.now()}.png`;
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+    </script>
+</body>
+</html>

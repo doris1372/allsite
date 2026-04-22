@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather App - AllSite</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .weather-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 2rem;
+        }
+
+        .weather-search {
+            text-align: center;
+            margin: 2rem 0;
+        }
+
+        .weather-search input {
+            padding: 1rem 2rem;
+            font-size: 1.2rem;
+            border: 2px solid var(--primary);
+            border-radius: 50px;
+            width: 400px;
+            max-width: 90%;
+            background: var(--card-bg);
+            color: var(--text);
+        }
+
+        .weather-search button {
+            padding: 1rem 2rem;
+            font-size: 1.2rem;
+            margin-left: 1rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .weather-search button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px var(--shadow);
+        }
+
+        .current-weather {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 3rem;
+            border-radius: 30px;
+            color: white;
+            text-align: center;
+            margin: 2rem 0;
+            box-shadow: 0 10px 30px var(--shadow);
+        }
+
+        .weather-icon {
+            font-size: 8rem;
+            margin: 1rem 0;
+        }
+
+        .temperature {
+            font-size: 5rem;
+            font-weight: bold;
+            margin: 1rem 0;
+        }
+
+        .weather-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .detail-item {
+            background: rgba(255,255,255,0.2);
+            padding: 1rem;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        .detail-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .detail-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-top: 0.5rem;
+        }
+
+        .forecast-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .forecast-card {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 5px 15px var(--shadow);
+            transition: all 0.3s;
+        }
+
+        .forecast-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px var(--shadow);
+        }
+
+        .forecast-day {
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .forecast-icon {
+            font-size: 3rem;
+            margin: 1rem 0;
+        }
+
+        .forecast-temp {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .forecast-desc {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-top: 0.5rem;
+        }
+
+        .location-suggestions {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin: 2rem 0;
+        }
+
+        .location-chip {
+            padding: 0.8rem 1.5rem;
+            background: var(--card-bg);
+            border: 2px solid var(--primary);
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .location-chip:hover {
+            background: var(--primary);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        @media (max-width: 768px) {
+            .temperature {
+                font-size: 3rem;
+            }
+            .weather-icon {
+                font-size: 5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">🌤️ Weather</div>
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="drawing.html">Drawing</a></li>
+            <li><a href="music.html">Music</a></li>
+            <li><a href="quiz.html">Quiz</a></li>
+            <li><a href="casino.html">Casino</a></li>
+            <li><a href="ru.html">RU</a></li>
+            <li><a href="index.html">EN</a></li>
+        </ul>
+        <button class="theme-toggle" id="themeToggle">🌙</button>
+    </nav>
+
+    <div class="weather-container">
+        <h1 style="text-align: center;">🌤️ Weather Forecast</h1>
+
+        <div class="weather-search">
+            <input type="text" id="cityInput" placeholder="Enter city name..." onkeypress="if(event.key==='Enter') searchWeather()">
+            <button onclick="searchWeather()">🔍 Search</button>
+        </div>
+
+        <div class="location-suggestions">
+            <div class="location-chip" onclick="loadCity('New York')">🗽 New York</div>
+            <div class="location-chip" onclick="loadCity('London')">🇬🇧 London</div>
+            <div class="location-chip" onclick="loadCity('Tokyo')">🗼 Tokyo</div>
+            <div class="location-chip" onclick="loadCity('Paris')">🗼 Paris</div>
+            <div class="location-chip" onclick="loadCity('Sydney')">🦘 Sydney</div>
+            <div class="location-chip" onclick="loadCity('Moscow')">🇷🇺 Moscow</div>
+        </div>
+
+        <div class="current-weather" id="currentWeather">
+            <h2 id="cityName">Select a city</h2>
+            <div class="weather-icon" id="weatherIcon">🌤️</div>
+            <div class="temperature" id="temperature">--°</div>
+            <div id="weatherDesc" style="font-size: 1.5rem; margin: 1rem 0;">--</div>
+
+            <div class="weather-details">
+                <div class="detail-item">
+                    <div class="detail-label">💨 Wind</div>
+                    <div class="detail-value" id="wind">-- km/h</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">💧 Humidity</div>
+                    <div class="detail-value" id="humidity">--%</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">🌡️ Feels Like</div>
+                    <div class="detail-value" id="feelsLike">--°</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">👁️ Visibility</div>
+                    <div class="detail-value" id="visibility">-- km</div>
+                </div>
+            </div>
+        </div>
+
+        <h2 style="text-align: center; margin: 3rem 0 2rem 0;">📅 7-Day Forecast</h2>
+        <div class="forecast-grid" id="forecastGrid"></div>
+    </div>
+
+    <script>
+        // Theme Toggle
+        const themeToggle = document.getElementById('themeToggle');
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            themeToggle.textContent = document.body.classList.contains('dark-mode') ? '☀️' : '🌙';
+            localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+        });
+
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark-mode');
+            themeToggle.textContent = '☀️';
+        }
+
+        // Weather data generator
+        const weatherConditions = [
+            { icon: '☀️', desc: 'Sunny', temp: [20, 30] },
+            { icon: '⛅', desc: 'Partly Cloudy', temp: [15, 25] },
+            { icon: '☁️', desc: 'Cloudy', temp: [10, 20] },
+            { icon: '🌧️', desc: 'Rainy', temp: [8, 18] },
+            { icon: '⛈️', desc: 'Thunderstorm', temp: [12, 22] },
+            { icon: '🌨️', desc: 'Snow', temp: [-5, 5] },
+            { icon: '🌫️', desc: 'Foggy', temp: [5, 15] }
+        ];
+
+        function generateWeather(city) {
+            const condition = weatherConditions[Math.floor(Math.random() * weatherConditions.length)];
+            const temp = Math.floor(Math.random() * (condition.temp[1] - condition.temp[0]) + condition.temp[0]);
+
+            return {
+                city: city,
+                icon: condition.icon,
+                desc: condition.desc,
+                temp: temp,
+                feelsLike: temp + Math.floor(Math.random() * 6 - 3),
+                wind: Math.floor(Math.random() * 40 + 5),
+                humidity: Math.floor(Math.random() * 60 + 30),
+                visibility: Math.floor(Math.random() * 15 + 5)
+            };
+        }
+
+        function generateForecast() {
+            const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+            const today = new Date().getDay();
+            const forecast = [];
+
+            for (let i = 0; i < 7; i++) {
+                const dayIndex = (today + i) % 7;
+                const condition = weatherConditions[Math.floor(Math.random() * weatherConditions.length)];
+                const temp = Math.floor(Math.random() * (condition.temp[1] - condition.temp[0]) + condition.temp[0]);
+
+                forecast.push({
+                    day: i === 0 ? 'Today' : days[dayIndex],
+                    icon: condition.icon,
+                    desc: condition.desc,
+                    temp: temp,
+                    tempLow: temp - Math.floor(Math.random() * 8 + 3)
+                });
+            }
+
+            return forecast;
+        }
+
+        function loadCity(city) {
+            const weather = generateWeather(city);
+
+            document.getElementById('cityName').textContent = weather.city;
+            document.getElementById('weatherIcon').textContent = weather.icon;
+            document.getElementById('temperature').textContent = weather.temp + '°C';
+            document.getElementById('weatherDesc').textContent = weather.desc;
+            document.getElementById('wind').textContent = weather.wind + ' km/h';
+            document.getElementById('humidity').textContent = weather.humidity + '%';
+            document.getElementById('feelsLike').textContent = weather.feelsLike + '°C';
+            document.getElementById('visibility').textContent = weather.visibility + ' km';
+
+            const forecast = generateForecast();
+            const forecastGrid = document.getElementById('forecastGrid');
+            forecastGrid.innerHTML = '';
+
+            forecast.forEach(day => {
+                const card = document.createElement('div');
+                card.className = 'forecast-card';
+                card.innerHTML = `
+                    <div class="forecast-day">${day.day}</div>
+                    <div class="forecast-icon">${day.icon}</div>
+                    <div class="forecast-temp">${day.temp}°C</div>
+                    <div class="forecast-desc">${day.desc}</div>
+                    <div style="margin-top: 0.5rem; opacity: 0.7;">Low: ${day.tempLow}°C</div>
+                `;
+                forecastGrid.appendChild(card);
+            });
+        }
+
+        function searchWeather() {
+            const city = document.getElementById('cityInput').value.trim();
+            if (city) {
+                loadCity(city);
+                document.getElementById('cityInput').value = '';
+            }
+        }
+
+        // Load default city
+        loadCity('New York');
+    </script>
+</body>
+</html>

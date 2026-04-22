@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Playground - AllSite</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .playground-container {
+            max-width: 1600px;
+            margin: 2rem auto;
+            padding: 2rem;
+        }
+
+        .playground-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .editor-panel {
+            background: var(--card-bg);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px var(--shadow);
+        }
+
+        .panel-header {
+            background: var(--primary);
+            color: white;
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .panel-header h3 {
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .code-editor {
+            width: 100%;
+            height: 400px;
+            padding: 1.5rem;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            border: none;
+            background: #1e1e1e;
+            color: #d4d4d4;
+            resize: vertical;
+            outline: none;
+        }
+
+        .output-frame {
+            width: 100%;
+            height: 400px;
+            border: none;
+            background: white;
+        }
+
+        .console-output {
+            width: 100%;
+            height: 400px;
+            padding: 1.5rem;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            background: #1e1e1e;
+            color: #4ec9b0;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 1rem;
+            margin: 1rem 0;
+            flex-wrap: wrap;
+        }
+
+        .toolbar button {
+            padding: 0.8rem 1.5rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1rem;
+        }
+
+        .toolbar button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px var(--shadow);
+        }
+
+        .toolbar select {
+            padding: 0.8rem 1.5rem;
+            background: var(--card-bg);
+            color: var(--text);
+            border: 2px solid var(--primary);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .templates-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .template-card {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .template-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px var(--shadow);
+        }
+
+        .template-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        @media (max-width: 1200px) {
+            .playground-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">💻 Code Playground</div>
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="drawing.html">Drawing</a></li>
+            <li><a href="music.html">Music</a></li>
+            <li><a href="quiz.html">Quiz</a></li>
+            <li><a href="casino.html">Casino</a></li>
+            <li><a href="ru.html">RU</a></li>
+            <li><a href="index.html">EN</a></li>
+        </ul>
+        <button class="theme-toggle" id="themeToggle">🌙</button>
+    </nav>
+
+    <div class="playground-container">
+        <h1 style="text-align: center;">💻 Code Playground</h1>
+
+        <div class="toolbar">
+            <button onclick="runCode()">▶️ Run Code</button>
+            <button onclick="clearAll()">🗑️ Clear All</button>
+            <button onclick="saveCode()">💾 Save</button>
+            <button onclick="loadCode()">📂 Load</button>
+            <button onclick="shareCode()">🔗 Share</button>
+            <select id="templateSelect" onchange="loadTemplate()">
+                <option value="">📋 Load Template...</option>
+                <option value="hello">Hello World</option>
+                <option value="calculator">Calculator</option>
+                <option value="todo">Todo List</option>
+                <option value="clock">Digital Clock</option>
+                <option value="counter">Counter App</option>
+                <option value="form">Form Validation</option>
+                <option value="animation">CSS Animation</option>
+                <option value="game">Simple Game</option>
+            </select>
+        </div>
+
+        <div class="playground-layout">
+            <div class="editor-panel">
+                <div class="panel-header">
+                    <h3>📄 HTML</h3>
+                </div>
+                <textarea class="code-editor" id="htmlCode" placeholder="Write your HTML here..."></textarea>
+            </div>
+
+            <div class="editor-panel">
+                <div class="panel-header">
+                    <h3>🎨 CSS</h3>
+                </div>
+                <textarea class="code-editor" id="cssCode" placeholder="Write your CSS here..."></textarea>
+            </div>
+
+            <div class="editor-panel">
+                <div class="panel-header">
+                    <h3>⚡ JavaScript</h3>
+                </div>
+                <textarea class="code-editor" id="jsCode" placeholder="Write your JavaScript here..."></textarea>
+            </div>
+
+            <div class="editor-panel">
+                <div class="panel-header">
+                    <h3>📺 Output</h3>
+                    <button onclick="runCode()" style="background: white; color: var(--primary); padding: 0.5rem 1rem; border: none; border-radius: 5px; cursor: pointer;">▶️ Run</button>
+                </div>
+                <iframe class="output-frame" id="output"></iframe>
+            </div>
+        </div>
+
+        <div class="editor-panel" style="margin-top: 1.5rem;">
+            <div class="panel-header">
+                <h3>🖥️ Console</h3>
+                <button onclick="clearConsole()" style="background: white; color: var(--primary); padding: 0.5rem 1rem; border: none; border-radius: 5px; cursor: pointer;">🗑️ Clear</button>
+            </div>
+            <div class="console-output" id="console"></div>
+        </div>
+    </div>
+
+    <script>
+        // Theme Toggle
+        const themeToggle = document.getElementById('themeToggle');
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            themeToggle.textContent = document.body.classList.contains('dark-mode') ? '☀️' : '🌙';
+            localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+        });
+
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark-mode');
+            themeToggle.textContent = '☀️';
+        }
+
+        // Code Playground
+        const htmlCode = document.getElementById('htmlCode');
+        const cssCode = document.getElementById('cssCode');
+        const jsCode = document.getElementById('jsCode');
+        const output = document.getElementById('output');
+        const consoleOutput = document.getElementById('console');
+
+        function runCode() {
+            const html = htmlCode.value;
+            const css = `<style>${cssCode.value}</style>`;
+            const js = `<script>
+                const originalLog = console.log;
+                const originalError = console.error;
+                const originalWarn = console.warn;
+
+                console.log = function(...args) {
+                    window.parent.postMessage({type: 'log', data: args.join(' ')}, '*');
+                    originalLog.apply(console, args);
+                };
+                console.error = function(...args) {
+                    window.parent.postMessage({type: 'error', data: args.join(' ')}, '*');
+                    originalError.apply(console, args);
+                };
+                console.warn = function(...args) {
+                    window.parent.postMessage({type: 'warn', data: args.join(' ')}, '*');
+                    originalWarn.apply(console, args);
+                };
+
+                window.onerror = function(msg, url, line, col, error) {
+                    window.parent.postMessage({type: 'error', data: 'Error: ' + msg + ' (Line ' + line + ')'}, '*');
+                    return false;
+                };
+
+                try {
+                    ${jsCode.value}
+                } catch(e) {
+                    window.parent.postMessage({type: 'error', data: 'Error: ' + e.message}, '*');
+                }
+            <\/script>`;
+
+            const fullCode = html + css + js;
+            const blob = new Blob([fullCode], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            output.src = url;
+        }
+
+        window.addEventListener('message', (event) => {
+            if (event.data.type === 'log') {
+                consoleOutput.innerHTML += `<div style="color: #4ec9b0;">▶ ${event.data.data}</div>`;
+            } else if (event.data.type === 'error') {
+                consoleOutput.innerHTML += `<div style="color: #f48771;">❌ ${event.data.data}</div>`;
+            } else if (event.data.type === 'warn') {
+                consoleOutput.innerHTML += `<div style="color: #dcdcaa;">⚠️ ${event.data.data}</div>`;
+            }
+            consoleOutput.scrollTop = consoleOutput.scrollHeight;
+        });
+
+        function clearConsole() {
+            consoleOutput.innerHTML = '';
+        }
+
+        function clearAll() {
+            htmlCode.value = '';
+            cssCode.value = '';
+            jsCode.value = '';
+            output.src = '';
+            clearConsole();
+        }
+
+        function saveCode() {
+            const code = {
+                html: htmlCode.value,
+                css: cssCode.value,
+                js: jsCode.value
+            };
+            localStorage.setItem('savedCode', JSON.stringify(code));
+            alert('✅ Code saved!');
+        }
+
+        function loadCode() {
+            const saved = localStorage.getItem('savedCode');
+            if (saved) {
+                const code = JSON.parse(saved);
+                htmlCode.value = code.html;
+                cssCode.value = code.css;
+                jsCode.value = code.js;
+                alert('✅ Code loaded!');
+            } else {
+                alert('❌ No saved code found!');
+            }
+        }
+
+        function shareCode() {
+            const code = {
+                html: htmlCode.value,
+                css: cssCode.value,
+                js: jsCode.value
+            };
+            const encoded = btoa(JSON.stringify(code));
+            const url = window.location.href.split('?')[0] + '?code=' + encoded;
+            navigator.clipboard.writeText(url).then(() => {
+                alert('🔗 Share link copied to clipboard!');
+            });
+        }
+
+        function loadTemplate() {
+            const template = document.getElementById('templateSelect').value;
+            if (!template) return;
+
+            const templates = {
+                hello: {
+                    html: '<div class="container">\n  <h1>Hello World!</h1>\n  <p>Welcome to Code Playground</p>\n  <button onclick="greet()">Click Me</button>\n</div>',
+                    css: '.container {\n  text-align: center;\n  padding: 50px;\n  font-family: Arial;\n}\n\nh1 {\n  color: #667eea;\n  font-size: 3rem;\n}\n\nbutton {\n  padding: 15px 30px;\n  font-size: 1.2rem;\n  background: #667eea;\n  color: white;\n  border: none;\n  border-radius: 10px;\n  cursor: pointer;\n}',
+                    js: 'function greet() {\n  alert("Hello from Code Playground!");\n  console.log("Button clicked!");\n}'
+                },
+                calculator: {
+                    html: '<div class="calc">\n  <input type="text" id="display" readonly>\n  <div class="buttons">\n    <button onclick="append(\'7\')">7</button>\n    <button onclick="append(\'8\')">8</button>\n    <button onclick="append(\'9\')">9</button>\n    <button onclick="append(\'+\')">+</button>\n    <button onclick="append(\'4\')">4</button>\n    <button onclick="append(\'5\')">5</button>\n    <button onclick="append(\'6\')">6</button>\n    <button onclick="append(\'-\')">-</button>\n    <button onclick="append(\'1\')">1</button>\n    <button onclick="append(\'2\')">2</button>\n    <button onclick="append(\'3\')">3</button>\n    <button onclick="append(\'*\')">*</button>\n    <button onclick="append(\'0\')">0</button>\n    <button onclick="calculate()">=</button>\n    <button onclick="clear()">C</button>\n    <button onclick="append(\'/\')">/</button>\n  </div>\n</div>',
+                    css: '.calc {\n  max-width: 300px;\n  margin: 50px auto;\n  padding: 20px;\n  background: #f0f0f0;\n  border-radius: 15px;\n}\n\n#display {\n  width: 100%;\n  padding: 20px;\n  font-size: 2rem;\n  margin-bottom: 10px;\n  border: none;\n  border-radius: 10px;\n}\n\n.buttons {\n  display: grid;\n  grid-template-columns: repeat(4, 1fr);\n  gap: 10px;\n}\n\nbutton {\n  padding: 20px;\n  font-size: 1.5rem;\n  border: none;\n  border-radius: 10px;\n  cursor: pointer;\n  background: #667eea;\n  color: white;\n}',
+                    js: 'function append(val) {\n  document.getElementById("display").value += val;\n}\n\nfunction calculate() {\n  try {\n    const result = eval(document.getElementById("display").value);\n    document.getElementById("display").value = result;\n  } catch(e) {\n    alert("Invalid expression");\n  }\n}\n\nfunction clear() {\n  document.getElementById("display").value = "";\n}'
+                },
+                todo: {
+                    html: '<div class="todo-app">\n  <h1>📝 Todo List</h1>\n  <input type="text" id="todoInput" placeholder="Add new task...">\n  <button onclick="addTodo()">Add</button>\n  <ul id="todoList"></ul>\n</div>',
+                    css: '.todo-app {\n  max-width: 500px;\n  margin: 50px auto;\n  padding: 30px;\n  background: white;\n  border-radius: 15px;\n  box-shadow: 0 10px 30px rgba(0,0,0,0.1);\n}\n\nh1 {\n  text-align: center;\n  color: #667eea;\n}\n\ninput {\n  width: 70%;\n  padding: 15px;\n  font-size: 1rem;\n  border: 2px solid #667eea;\n  border-radius: 10px;\n}\n\nbutton {\n  width: 25%;\n  padding: 15px;\n  margin-left: 5%;\n  background: #667eea;\n  color: white;\n  border: none;\n  border-radius: 10px;\n  cursor: pointer;\n}\n\nul {\n  list-style: none;\n  padding: 0;\n}\n\nli {\n  padding: 15px;\n  margin: 10px 0;\n  background: #f0f0f0;\n  border-radius: 10px;\n  cursor: pointer;\n}',
+                    js: 'function addTodo() {\n  const input = document.getElementById("todoInput");\n  const text = input.value.trim();\n  if (!text) return;\n  \n  const li = document.createElement("li");\n  li.textContent = text;\n  li.onclick = function() {\n    this.style.textDecoration = this.style.textDecoration === "line-through" ? "none" : "line-through";\n  };\n  \n  document.getElementById("todoList").appendChild(li);\n  input.value = "";\n  console.log("Task added:", text);\n}'
+                },
+                clock: {
+                    html: '<div class="clock-container">\n  <h1>🕐 Digital Clock</h1>\n  <div id="clock"></div>\n  <div id="date"></div>\n</div>',
+                    css: '.clock-container {\n  text-align: center;\n  padding: 50px;\n  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);\n  color: white;\n  border-radius: 20px;\n  margin: 50px auto;\n  max-width: 500px;\n}\n\n#clock {\n  font-size: 5rem;\n  font-weight: bold;\n  margin: 20px 0;\n  font-family: monospace;\n}\n\n#date {\n  font-size: 1.5rem;\n  opacity: 0.9;\n}',
+                    js: 'function updateClock() {\n  const now = new Date();\n  const time = now.toLocaleTimeString();\n  const date = now.toLocaleDateString();\n  \n  document.getElementById("clock").textContent = time;\n  document.getElementById("date").textContent = date;\n}\n\nsetInterval(updateClock, 1000);\nupdateClock();'
+                },
+                counter: {
+                    html: '<div class="counter">\n  <h1>Counter App</h1>\n  <div id="count">0</div>\n  <button onclick="increment()">➕ Increment</button>\n  <button onclick="decrement()">➖ Decrement</button>\n  <button onclick="reset()">🔄 Reset</button>\n</div>',
+                    css: '.counter {\n  text-align: center;\n  padding: 50px;\n  max-width: 400px;\n  margin: 50px auto;\n  background: white;\n  border-radius: 20px;\n  box-shadow: 0 10px 30px rgba(0,0,0,0.1);\n}\n\n#count {\n  font-size: 5rem;\n  font-weight: bold;\n  color: #667eea;\n  margin: 30px 0;\n}\n\nbutton {\n  padding: 15px 30px;\n  margin: 10px;\n  font-size: 1.2rem;\n  background: #667eea;\n  color: white;\n  border: none;\n  border-radius: 10px;\n  cursor: pointer;\n}',
+                    js: 'let count = 0;\n\nfunction increment() {\n  count++;\n  updateDisplay();\n}\n\nfunction decrement() {\n  count--;\n  updateDisplay();\n}\n\nfunction reset() {\n  count = 0;\n  updateDisplay();\n}\n\nfunction updateDisplay() {\n  document.getElementById("count").textContent = count;\n  console.log("Count:", count);\n}'
+                },
+                form: {
+                    html: '<div class="form-container">\n  <h1>📋 Form Validation</h1>\n  <form onsubmit="validateForm(event)">\n    <input type="text" id="name" placeholder="Name" required>\n    <input type="email" id="email" placeholder="Email" required>\n    <input type="password" id="password" placeholder="Password" required>\n    <button type="submit">Submit</button>\n  </form>\n  <div id="message"></div>\n</div>',
+                    css: '.form-container {\n  max-width: 400px;\n  margin: 50px auto;\n  padding: 30px;\n  background: white;\n  border-radius: 15px;\n  box-shadow: 0 10px 30px rgba(0,0,0,0.1);\n}\n\ninput {\n  width: 100%;\n  padding: 15px;\n  margin: 10px 0;\n  border: 2px solid #ddd;\n  border-radius: 10px;\n  font-size: 1rem;\n}\n\nbutton {\n  width: 100%;\n  padding: 15px;\n  margin-top: 10px;\n  background: #667eea;\n  color: white;\n  border: none;\n  border-radius: 10px;\n  font-size: 1.2rem;\n  cursor: pointer;\n}\n\n#message {\n  margin-top: 20px;\n  padding: 15px;\n  border-radius: 10px;\n  text-align: center;\n}',
+                    js: 'function validateForm(e) {\n  e.preventDefault();\n  \n  const name = document.getElementById("name").value;\n  const email = document.getElementById("email").value;\n  const password = document.getElementById("password").value;\n  const message = document.getElementById("message");\n  \n  if (password.length < 6) {\n    message.textContent = "❌ Password must be at least 6 characters";\n    message.style.background = "#ffebee";\n    message.style.color = "#c62828";\n    return;\n  }\n  \n  message.textContent = "✅ Form submitted successfully!";\n  message.style.background = "#e8f5e9";\n  message.style.color = "#2e7d32";\n  console.log("Form data:", {name, email, password});\n}'
+                },
+                animation: {
+                    html: '<div class="animation-demo">\n  <h1>CSS Animation Demo</h1>\n  <div class="box"></div>\n  <button onclick="toggleAnimation()">Toggle Animation</button>\n</div>',
+                    css: '.animation-demo {\n  text-align: center;\n  padding: 50px;\n}\n\n.box {\n  width: 100px;\n  height: 100px;\n  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);\n  margin: 50px auto;\n  border-radius: 20px;\n  animation: bounce 2s infinite;\n}\n\n@keyframes bounce {\n  0%, 100% { transform: translateY(0); }\n  50% { transform: translateY(-50px); }\n}\n\n.box.paused {\n  animation-play-state: paused;\n}\n\nbutton {\n  padding: 15px 30px;\n  background: #667eea;\n  color: white;\n  border: none;\n  border-radius: 10px;\n  font-size: 1.2rem;\n  cursor: pointer;\n}',
+                    js: 'function toggleAnimation() {\n  const box = document.querySelector(".box");\n  box.classList.toggle("paused");\n  console.log("Animation toggled");\n}'
+                },
+                game: {
+                    html: '<div class="game">\n  <h1>🎮 Guess the Number</h1>\n  <p>Guess a number between 1 and 100</p>\n  <input type="number" id="guess" min="1" max="100">\n  <button onclick="checkGuess()">Guess</button>\n  <div id="result"></div>\n  <div id="attempts"></div>\n</div>',
+                    css: '.game {\n  text-align: center;\n  padding: 50px;\n  max-width: 500px;\n  margin: 50px auto;\n  background: white;\n  border-radius: 20px;\n  box-shadow: 0 10px 30px rgba(0,0,0,0.1);\n}\n\ninput {\n  padding: 15px;\n  font-size: 1.5rem;\n  width: 150px;\n  border: 2px solid #667eea;\n  border-radius: 10px;\n  text-align: center;\n}\n\nbutton {\n  padding: 15px 30px;\n  margin-left: 10px;\n  font-size: 1.2rem;\n  background: #667eea;\n  color: white;\n  border: none;\n  border-radius: 10px;\n  cursor: pointer;\n}\n\n#result {\n  margin-top: 30px;\n  font-size: 1.5rem;\n  font-weight: bold;\n}\n\n#attempts {\n  margin-top: 10px;\n  color: #666;\n}',
+                    js: 'let targetNumber = Math.floor(Math.random() * 100) + 1;\nlet attempts = 0;\n\nfunction checkGuess() {\n  const guess = parseInt(document.getElementById("guess").value);\n  attempts++;\n  \n  if (guess === targetNumber) {\n    document.getElementById("result").textContent = "🎉 Correct! You won!";\n    document.getElementById("result").style.color = "#2e7d32";\n    document.getElementById("attempts").textContent = `Attempts: ${attempts}`;\n    console.log("Game won in", attempts, "attempts");\n  } else if (guess < targetNumber) {\n    document.getElementById("result").textContent = "📈 Too low! Try higher";\n    document.getElementById("result").style.color = "#1976d2";\n  } else {\n    document.getElementById("result").textContent = "📉 Too high! Try lower";\n    document.getElementById("result").style.color = "#d32f2f";\n  }\n  \n  document.getElementById("attempts").textContent = `Attempts: ${attempts}`;\n}'
+                }
+            };
+
+            const t = templates[template];
+            if (t) {
+                htmlCode.value = t.html;
+                cssCode.value = t.css;
+                jsCode.value = t.js;
+                runCode();
+            }
+
+            document.getElementById('templateSelect').value = '';
+        }
+
+        // Check for shared code in URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const sharedCode = urlParams.get('code');
+        if (sharedCode) {
+            try {
+                const code = JSON.parse(atob(sharedCode));
+                htmlCode.value = code.html;
+                cssCode.value = code.css;
+                jsCode.value = code.js;
+                runCode();
+            } catch(e) {
+                console.error('Failed to load shared code');
+            }
+        }
+
+        // Auto-run on Ctrl+Enter
+        [htmlCode, cssCode, jsCode].forEach(editor => {
+            editor.addEventListener('keydown', (e) => {
+                if (e.ctrlKey && e.key === 'Enter') {
+                    runCode();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
