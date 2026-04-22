@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ВсёСайт - Всё в Одном Месте</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌐</text></svg>">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">🌐 ВсёСайт</div>
+        <ul class="nav-links">
+            <li><a href="#home">Главная</a></li>
+            <li><a href="#tools">Инструменты</a></li>
+            <li><a href="#games">Игры</a></li>
+            <li><a href="drawing.html">Рисование</a></li>
+            <li><a href="music.html">Музыка</a></li>
+            <li><a href="quiz.html">Викторина</a></li>
+            <li><a href="ru.html">RU</a></li>
+            <li><a href="index.html">EN</a></li>
+        </ul>
+        <button class="theme-toggle" id="themeToggle">🌙</button>
+    </nav>
+
+    <section id="home" class="hero">
+        <h1>Добро пожаловать на ВсёСайт</h1>
+        <p>Всё что вам нужно в одном месте</p>
+        <div class="hero-stats">
+            <div class="stat">
+                <h3>60+</h3>
+                <p>Функций</p>
+            </div>
+            <div class="stat">
+                <h3>100%</h3>
+                <p>Бесплатно</p>
+            </div>
+            <div class="stat">
+                <h3>∞</h3>
+                <p>Возможностей</p>
+            </div>
+        </div>
+        <div class="hero-buttons">
+            <button class="btn-primary" onclick="document.getElementById('tools').scrollIntoView({behavior: 'smooth'})">Начать</button>
+            <button class="btn-secondary" onclick="document.getElementById('features').scrollIntoView({behavior: 'smooth'})">Узнать больше</button>
+        </div>
+    </section>
+
+    <section id="features" class="section features-section">
+        <h2>✨ Удивительные Возможности</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">🚀</div>
+                <h3>Молниеносно Быстро</h3>
+                <p>Оптимизированная производительность</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🎨</div>
+                <h3>Красивый Дизайн</h3>
+                <p>Современный интерфейс с тёмной темой</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📱</div>
+                <h3>Адаптивный</h3>
+                <p>Работает на всех устройствах</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔒</div>
+                <h3>Приватность</h3>
+                <p>Все данные хранятся локально</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="tools" class="section">
+        <h2>🛠️ Инструменты Продуктивности</h2>
+        <div class="tools-grid">
+            <div class="tool-card">
+                <h3>📝 Заметки</h3>
+                <textarea id="notes" placeholder="Пишите ваши заметки здесь..."></textarea>
+                <button onclick="saveNotes()">💾 Сохранить</button>
+                <button onclick="clearNotes()">🗑️ Очистить</button>
+            </div>
+            <div class="tool-card">
+                <h3>⏱️ Таймер</h3>
+                <div class="timer-display" id="timerDisplay">00:00:00</div>
+                <div class="timer-controls">
+                    <button onclick="startTimer()">▶️ Старт</button>
+                    <button onclick="pauseTimer()">⏸️ Пауза</button>
+                    <button onclick="resetTimer()">🔄 Сброс</button>
+                </div>
+                <div class="timer-laps" id="timerLaps"></div>
+                <button onclick="addLap()">🏁 Круг</button>
+            </div>
+            <div class="tool-card">
+                <h3>🧮 Калькулятор</h3>
+                <div class="calculator">
+                    <input type="text" id="calcDisplay" readonly>
+                    <div class="calc-buttons">
+                        <button onclick="appendCalc('7')">7</button>
+                        <button onclick="appendCalc('8')">8</button>
+                        <button onclick="appendCalc('9')">9</button>
+                        <button onclick="appendCalc('/')">/</button>
+                        <button onclick="appendCalc('4')">4</button>
+                        <button onclick="appendCalc('5')">5</button>
+                        <button onclick="appendCalc('6')">6</button>
+                        <button onclick="appendCalc('*')">*</button>
+                        <button onclick="appendCalc('1')">1</button>
+                        <button onclick="appendCalc('2')">2</button>
+                        <button onclick="appendCalc('3')">3</button>
+                        <button onclick="appendCalc('-')">-</button>
+                        <button onclick="appendCalc('0')">0</button>
+                        <button onclick="appendCalc('.')">.</button>
+                        <button onclick="calculateResult()">=</button>
+                        <button onclick="appendCalc('+')">+</button>
+                        <button onclick="clearCalc()" style="grid-column: span 4">C</button>
+                    </div>
+                </div>
+            </div>
+            <div class="tool-card">
+                <h3>📅 Календарь</h3>
+                <div id="calendar"></div>
+            </div>
+            <div class="tool-card">
+                <h3>🎨 Выбор Цвета</h3>
+                <input type="color" id="colorPicker" value="#3498db">
+                <div id="colorValue">#3498db</div>
+                <div id="colorInfo"></div>
+                <button onclick="copyColor()">📋 Копировать</button>
+            </div>
+            <div class="tool-card">
+                <h3>📝 Список Дел</h3>
+                <input type="text" id="todoInput" placeholder="Добавить задачу...">
+                <button onclick="addTodo()">➕ Добавить</button>
+                <ul id="todoList"></ul>
+            </div>
+            <div class="tool-card">
+                <h3>🎲 Генератор</h3>
+                <button onclick="generateRandom('number')">🔢 Число</button>
+                <button onclick="generateRandom('password')">🔐 Пароль</button>
+                <button onclick="generateRandom('color')">🎨 Цвет</button>
+                <button onclick="generateRandom('dice')">🎲 Кубик</button>
+                <div id="randomResult"></div>
+            </div>
+            <div class="tool-card">
+                <h3>⏰ Мировое Время</h3>
+                <div id="worldClock"></div>
+            </div>
+            <div class="tool-card">
+                <h3>📏 Счётчик Текста</h3>
+                <textarea id="textCounter" placeholder="Введите текст..."></textarea>
+                <div id="textStats"></div>
+            </div>
+        </div>
+    </section>
+
+    <section id="games" class="section">
+        <h2>🎮 Игры</h2>
+        <div class="games-grid">
+            <div class="game-card">
+                <h3>🐍 Змейка</h3>
+                <canvas id="snakeCanvas" width="400" height="400"></canvas>
+                <button onclick="startSnake()">Начать Игру</button>
+                <div>Счёт: <span id="snakeScore">0</span> | Рекорд: <span id="snakeHighScore">0</span></div>
+            </div>
+            <div class="game-card">
+                <h3>🎯 Память</h3>
+                <div id="memoryGame" class="memory-grid"></div>
+                <button onclick="startMemory()">Новая Игра</button>
+                <div>Ходы: <span id="memoryMoves">0</span></div>
+            </div>
+            <div class="game-card">
+                <h3>⭕ Крестики-Нолики</h3>
+                <div id="ticTacToe" class="tictactoe-grid"></div>
+                <button onclick="resetTicTacToe()">Сброс</button>
+                <div id="ticTacToeStatus">Ход игрока X</div>
+            </div>
+            <div class="game-card">
+                <h3>🎰 Слот-Машина</h3>
+                <div class="slot-machine">
+                    <div class="slots">
+                        <div id="slot1" class="slot">🍒</div>
+                        <div id="slot2" class="slot">🍋</div>
+                        <div id="slot3" class="slot">🍊</div>
+                    </div>
+                    <button onclick="spinSlots()">🎰 КРУТИТЬ</button>
+                    <div>Кредиты: <span id="slotCredits">100</span></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>🌟 Больше Возможностей</h2>
+        <div class="features-grid">
+            <div class="feature-card" onclick="window.location.href='drawing.html'">
+                <div class="feature-icon">🎨</div>
+                <h3>Доска для Рисования</h3>
+                <p>Инструменты рисования, палитра цветов</p>
+            </div>
+            <div class="feature-card" onclick="window.location.href='music.html'">
+                <div class="feature-icon">🎵</div>
+                <h3>Музыкальная Студия</h3>
+                <p>Пианино, барабаны, секвенсор</p>
+            </div>
+            <div class="feature-card" onclick="window.location.href='quiz.html'">
+                <div class="feature-icon">🧠</div>
+                <h3>Викторина</h3>
+                <p>8 категорий, 80 вопросов</p>
+            </div>
+            <div class="feature-card" onclick="window.location.href='3d.html'">
+                <div class="feature-icon">🎲</div>
+                <h3>3D Просмотр</h3>
+                <p>Интерактивные 3D фигуры</p>
+            </div>
+            <div class="feature-card" onclick="window.location.href='particles.html'">
+                <div class="feature-icon">✨</div>
+                <h3>Симулятор Частиц</h3>
+                <p>8 эффектов, физика</p>
+            </div>
+            <div class="feature-card" onclick="window.location.href='aichat.html'">
+                <div class="feature-icon">🤖</div>
+                <h3>AI Чат</h3>
+                <p>Умный чат-бот</p>
+            </div>
+            <div class="feature-card" onclick="window.location.href='maze.html'">
+                <div class="feature-icon">🎮</div>
+                <h3>Лабиринт</h3>
+                <p>Процедурная генерация</p>
+            </div>
+            <div class="feature-card" onclick="window.location.href='typing.html'">
+                <div class="feature-icon">⌨️</div>
+                <h3>Тест Скорости Печати</h3>
+                <p>WPM, точность, рейтинг</p>
+            </div>
+            <div class="feature-card" onclick="window.location.href='pixelart.html'">
+                <div class="feature-icon">🖼️</div>
+                <h3>Пиксель Арт</h3>
+                <p>Редактор пиксельной графики</p>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2026 ВсёСайт - Всё в Одном Месте</p>
+        <p>Создано с ❤️ используя HTML, CSS и JavaScript</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
