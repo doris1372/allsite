@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Particle Simulator - AllSite</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .simulator-container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 2rem;
+        }
+
+        #particleCanvas {
+            width: 100%;
+            height: 600px;
+            border: 3px solid var(--primary);
+            border-radius: 15px;
+            background: #000;
+            cursor: crosshair;
+        }
+
+        .sim-controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .control-panel {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px var(--shadow);
+        }
+
+        .control-panel h3 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .preset-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.5rem;
+        }
+
+        .preset-btn {
+            padding: 1rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+
+        .preset-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px var(--shadow);
+        }
+
+        .stats-display {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .stat-box {
+            background: var(--bg);
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--text);
+            opacity: 0.7;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">✨ Particle Simulator</div>
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="drawing.html">Drawing</a></li>
+            <li><a href="music.html">Music</a></li>
+            <li><a href="quiz.html">Quiz</a></li>
+            <li><a href="3d.html">3D Viewer</a></li>
+            <li><a href="particles.html">Particles</a></li>
+        </ul>
+        <button class="theme-toggle" id="themeToggle">🌙</button>
+    </nav>
+
+    <div class="simulator-container">
+        <h1 style="text-align: center;">✨ Particle Simulator</h1>
+
+        <canvas id="particleCanvas"></canvas>
+
+        <div class="sim-controls">
+            <div class="control-panel">
+                <h3>🎨 Presets</h3>
+                <div class="preset-grid">
+                    <button class="preset-btn" onclick="loadPreset('fireworks')">🎆 Fireworks</button>
+                    <button class="preset-btn" onclick="loadPreset('galaxy')">🌌 Galaxy</button>
+                    <button class="preset-btn" onclick="loadPreset('rain')">🌧️ Rain</button>
+                    <button class="preset-btn" onclick="loadPreset('snow')">❄️ Snow</button>
+                    <button class="preset-btn" onclick="loadPreset('fountain')">⛲ Fountain</button>
+                    <button class="preset-btn" onclick="loadPreset('explosion')">💥 Explosion</button>
+                    <button class="preset-btn" onclick="loadPreset('spiral')">🌀 Spiral</button>
+                    <button class="preset-btn" onclick="loadPreset('wave')">🌊 Wave</button>
+                </div>
+            </div>
+
+            <div class="control-panel">
+                <h3>⚙️ Settings</h3>
+                <div class="slider-control">
+                    <label>
+                        <span>Particle Count</span>
+                        <span id="countValue">100</span>
+                    </label>
+                    <input type="range" id="particleCount" min="10" max="500" value="100">
+                </div>
+                <div class="slider-control">
+                    <label>
+                        <span>Speed</span>
+                        <span id="speedValue">1.0x</span>
+                    </label>
+                    <input type="range" id="speed" min="0.1" max="3" step="0.1" value="1">
+                </div>
+                <div class="slider-control">
+                    <label>
+                        <span>Size</span>
+                        <span id="sizeValue">3px</span>
+                    </label>
+                    <input type="range" id="particleSize" min="1" max="10" value="3">
+                </div>
+            </div>
+
+            <div class="control-panel">
+                <h3>🎮 Controls</h3>
+                <button onclick="toggleSimulation()" style="width: 100%; margin-bottom: 0.5rem;">⏯️ Play/Pause</button>
+                <button onclick="clearParticles()" style="width: 100%; margin-bottom: 0.5rem;">🗑️ Clear</button>
+                <button onclick="toggleTrails()" style="width: 100%; margin-bottom: 0.5rem;">✨ Toggle Trails</button>
+                <button onclick="toggleGravity()" style="width: 100%;">🌍 Toggle Gravity</button>
+            </div>
+
+            <div class="control-panel">
+                <h3>📊 Statistics</h3>
+                <div class="stats-display">
+                    <div class="stat-box">
+                        <div class="stat-value" id="particleCountStat">0</div>
+                        <div class="stat-label">Particles</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value" id="fpsStat">60</div>
+                        <div class="stat-label">FPS</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Theme Toggle
+        const themeToggle = document.getElementById('themeToggle');
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            themeToggle.textContent = document.body.classList.contains('dark-mode') ? '☀️' : '🌙';
+        });
+
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark-mode');
+            themeToggle.textContent = '☀️';
+        }
+
+        // Particle Simulator
+        const canvas = document.getElementById('particleCanvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = canvas.offsetWidth;
+        canvas.height = 600;
+
+        let particles = [];
+        let isRunning = true;
+        let showTrails = false;
+        let gravityEnabled = false;
+        let maxParticles = 100;
+        let speedMultiplier = 1;
+        let particleSize = 3;
+        let currentPreset = 'fireworks';
+
+        class Particle {
+            constructor(x, y, vx, vy, color, life = 100) {
+                this.x = x;
+                this.y = y;
+                this.vx = vx;
+                this.vy = vy;
+                this.color = color;
+                this.life = life;
+                this.maxLife = life;
+                this.size = particleSize;
+            }
+
+            update() {
+                this.x += this.vx * speedMultiplier;
+                this.y += this.vy * speedMultiplier;
+
+                if (gravityEnabled) {
+                    this.vy += 0.1;
+                }
+
+                this.life--;
+
+                if (this.x < 0 || this.x > canvas.width) this.vx *= -0.8;
+                if (this.y < 0 || this.y > canvas.height) this.vy *= -0.8;
+            }
+
+            draw() {
+                const alpha = this.life / this.maxLife;
+                ctx.fillStyle = this.color.replace(')', `, ${alpha})`).replace('rgb', 'rgba');
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            isDead() {
+                return this.life <= 0;
+            }
+        }
+
+        function createFirework(x, y) {
+            const colors = ['rgb(255, 0, 0)', 'rgb(0, 255, 0)', 'rgb(0, 0, 255)', 'rgb(255, 255, 0)', 'rgb(255, 0, 255)', 'rgb(0, 255, 255)'];
+            const color = colors[Math.floor(Math.random() * colors.length)];
+
+            for (let i = 0; i < 30; i++) {
+                const angle = (Math.PI * 2 * i) / 30;
+                const speed = Math.random() * 3 + 2;
+                const vx = Math.cos(angle) * speed;
+                const vy = Math.sin(angle) * speed;
+                particles.push(new Particle(x, y, vx, vy, color, 60));
+            }
+        }
+
+        function createGalaxy() {
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+
+            for (let i = 0; i < 5; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const radius = Math.random() * 200;
+                const x = centerX + Math.cos(angle) * radius;
+                const y = centerY + Math.sin(angle) * radius;
+                const vx = -Math.sin(angle) * 2;
+                const vy = Math.cos(angle) * 2;
+                const color = `rgb(${Math.random() * 100 + 155}, ${Math.random() * 100 + 155}, 255)`;
+                particles.push(new Particle(x, y, vx, vy, color, 200));
+            }
+        }
+
+        function createRain() {
+            if (particles.length < maxParticles) {
+                const x = Math.random() * canvas.width;
+                const y = 0;
+                const vx = 0;
+                const vy = Math.random() * 3 + 5;
+                particles.push(new Particle(x, y, vx, vy, 'rgb(100, 150, 255)', 100));
+            }
+        }
+
+        function createSnow() {
+            if (particles.length < maxParticles) {
+                const x = Math.random() * canvas.width;
+                const y = 0;
+                const vx = (Math.random() - 0.5) * 2;
+                const vy = Math.random() * 1 + 1;
+                particles.push(new Particle(x, y, vx, vy, 'rgb(255, 255, 255)', 150));
+            }
+        }
+
+        function createFountain() {
+            const x = canvas.width / 2;
+            const y = canvas.height - 50;
+            const angle = -Math.PI / 2 + (Math.random() - 0.5) * 0.5;
+            const speed = Math.random() * 5 + 5;
+            const vx = Math.cos(angle) * speed;
+            const vy = Math.sin(angle) * speed;
+            const color = `rgb(${Math.random() * 100 + 155}, ${Math.random() * 100 + 155}, 255)`;
+            particles.push(new Particle(x, y, vx, vy, color, 80));
+        }
+
+        function createExplosion() {
+            const x = canvas.width / 2;
+            const y = canvas.height / 2;
+
+            for (let i = 0; i < 50; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const speed = Math.random() * 8 + 2;
+                const vx = Math.cos(angle) * speed;
+                const vy = Math.sin(angle) * speed;
+                const color = `rgb(255, ${Math.random() * 100}, 0)`;
+                particles.push(new Particle(x, y, vx, vy, color, 50));
+            }
+        }
+
+        function createSpiral() {
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const time = Date.now() / 1000;
+            const angle = time * 2;
+            const radius = (time % 5) * 50;
+            const x = centerX + Math.cos(angle) * radius;
+            const y = centerY + Math.sin(angle) * radius;
+            const color = `hsl(${(time * 50) % 360}, 100%, 50%)`;
+            particles.push(new Particle(x, y, 0, 0, color, 100));
+        }
+
+        function createWave() {
+            const time = Date.now() / 1000;
+            const x = (time * 100) % canvas.width;
+            const y = canvas.height / 2 + Math.sin(time * 3) * 100;
+            const color = `hsl(${(time * 100) % 360}, 100%, 50%)`;
+            particles.push(new Particle(x, y, 2, 0, color, 50));
+        }
+
+        function loadPreset(preset) {
+            currentPreset = preset;
+            clearParticles();
+        }
+
+        function animate() {
+            if (!isRunning) {
+                requestAnimationFrame(animate);
+                return;
+            }
+
+            if (!showTrails) {
+                ctx.fillStyle = 'rgba(0, 0, 0, 1)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            } else {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            }
+
+            // Generate particles based on preset
+            switch(currentPreset) {
+                case 'galaxy':
+                    if (Math.random() < 0.3) createGalaxy();
+                    break;
+                case 'rain':
+                    if (Math.random() < 0.5) createRain();
+                    break;
+                case 'snow':
+                    if (Math.random() < 0.3) createSnow();
+                    break;
+                case 'fountain':
+                    if (Math.random() < 0.5) createFountain();
+                    break;
+                case 'spiral':
+                    if (Math.random() < 0.5) createSpiral();
+                    break;
+                case 'wave':
+                    if (Math.random() < 0.3) createWave();
+                    break;
+            }
+
+            particles = particles.filter(p => !p.isDead());
+
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+
+            document.getElementById('particleCountStat').textContent = particles.length;
+
+            requestAnimationFrame(animate);
+        }
+
+        // Controls
+        document.getElementById('particleCount').addEventListener('input', (e) => {
+            maxParticles = parseInt(e.target.value);
+            document.getElementById('countValue').textContent = maxParticles;
+        });
+
+        document.getElementById('speed').addEventListener('input', (e) => {
+            speedMultiplier = parseFloat(e.target.value);
+            document.getElementById('speedValue').textContent = speedMultiplier.toFixed(1) + 'x';
+        });
+
+        document.getElementById('particleSize').addEventListener('input', (e) => {
+            particleSize = parseInt(e.target.value);
+            document.getElementById('sizeValue').textContent = particleSize + 'px';
+        });
+
+        function toggleSimulation() {
+            isRunning = !isRunning;
+        }
+
+        function clearParticles() {
+            particles = [];
+        }
+
+        function toggleTrails() {
+            showTrails = !showTrails;
+        }
+
+        function toggleGravity() {
+            gravityEnabled = !gravityEnabled;
+        }
+
+        // Mouse interaction
+        canvas.addEventListener('click', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            if (currentPreset === 'fireworks') {
+                createFirework(x, y);
+            } else if (currentPreset === 'explosion') {
+                createExplosion();
+            }
+        });
+
+        // FPS Counter
+        let lastTime = Date.now();
+        let frames = 0;
+        setInterval(() => {
+            const now = Date.now();
+            const fps = Math.round(frames * 1000 / (now - lastTime));
+            document.getElementById('fpsStat').textContent = fps;
+            frames = 0;
+            lastTime = now;
+        }, 1000);
+
+        function countFrame() {
+            frames++;
+            requestAnimationFrame(countFrame);
+        }
+        countFrame();
+
+        animate();
+    </script>
+</body>
+</html>

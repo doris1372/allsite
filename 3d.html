@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Viewer - AllSite</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .viewer-container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 2rem;
+        }
+
+        #canvas3d {
+            width: 100%;
+            height: 600px;
+            border: 3px solid var(--primary);
+            border-radius: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            cursor: grab;
+        }
+
+        #canvas3d:active {
+            cursor: grabbing;
+        }
+
+        .controls-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .control-group {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px var(--shadow);
+        }
+
+        .control-group h3 {
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+
+        .slider-control {
+            margin: 1rem 0;
+        }
+
+        .slider-control label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .slider-control input[type="range"] {
+            width: 100%;
+        }
+
+        .shape-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;
+        }
+
+        .shape-btn {
+            padding: 1rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1.5rem;
+        }
+
+        .shape-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px var(--shadow);
+        }
+
+        .shape-btn.active {
+            background: var(--secondary);
+        }
+
+        .animation-controls {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">🎲 3D Viewer</div>
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="drawing.html">Drawing</a></li>
+            <li><a href="music.html">Music</a></li>
+            <li><a href="quiz.html">Quiz</a></li>
+            <li><a href="3d.html">3D Viewer</a></li>
+        </ul>
+        <button class="theme-toggle" id="themeToggle">🌙</button>
+    </nav>
+
+    <div class="viewer-container">
+        <h1 style="text-align: center;">🎲 3D Viewer</h1>
+
+        <canvas id="canvas3d"></canvas>
+
+        <div class="controls-panel">
+            <div class="control-group">
+                <h3>🎨 Shape</h3>
+                <div class="shape-grid">
+                    <button class="shape-btn active" onclick="changeShape('cube')">📦</button>
+                    <button class="shape-btn" onclick="changeShape('sphere')">⚽</button>
+                    <button class="shape-btn" onclick="changeShape('pyramid')">🔺</button>
+                    <button class="shape-btn" onclick="changeShape('cylinder')">🥫</button>
+                    <button class="shape-btn" onclick="changeShape('torus')">🍩</button>
+                    <button class="shape-btn" onclick="changeShape('cone')">🎉</button>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <h3>🎨 Color</h3>
+                <input type="color" id="shapeColor" value="#3498db" style="width: 100%; height: 60px;">
+                <button onclick="randomColor()" style="width: 100%; margin-top: 0.5rem;">🎲 Random Color</button>
+            </div>
+
+            <div class="control-group">
+                <h3>🔄 Rotation</h3>
+                <div class="slider-control">
+                    <label>
+                        <span>X Axis</span>
+                        <span id="rotXValue">0°</span>
+                    </label>
+                    <input type="range" id="rotX" min="0" max="360" value="0">
+                </div>
+                <div class="slider-control">
+                    <label>
+                        <span>Y Axis</span>
+                        <span id="rotYValue">0°</span>
+                    </label>
+                    <input type="range" id="rotY" min="0" max="360" value="0">
+                </div>
+                <div class="slider-control">
+                    <label>
+                        <span>Z Axis</span>
+                        <span id="rotZValue">0°</span>
+                    </label>
+                    <input type="range" id="rotZ" min="0" max="360" value="0">
+                </div>
+            </div>
+
+            <div class="control-group">
+                <h3>📏 Scale</h3>
+                <div class="slider-control">
+                    <label>
+                        <span>Size</span>
+                        <span id="scaleValue">1.0x</span>
+                    </label>
+                    <input type="range" id="scale" min="0.5" max="3" step="0.1" value="1">
+                </div>
+            </div>
+
+            <div class="control-group">
+                <h3>✨ Animation</h3>
+                <div class="animation-controls">
+                    <button onclick="toggleAnimation('rotate')">🔄 Rotate</button>
+                    <button onclick="toggleAnimation('bounce')">⬆️ Bounce</button>
+                    <button onclick="toggleAnimation('pulse')">💓 Pulse</button>
+                    <button onclick="stopAllAnimations()">⏹️ Stop All</button>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <h3>💡 Lighting</h3>
+                <div class="slider-control">
+                    <label>
+                        <span>Brightness</span>
+                        <span id="brightnessValue">100%</span>
+                    </label>
+                    <input type="range" id="brightness" min="0" max="200" value="100">
+                </div>
+                <button onclick="toggleWireframe()">🔲 Toggle Wireframe</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Theme Toggle
+        const themeToggle = document.getElementById('themeToggle');
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            themeToggle.textContent = document.body.classList.contains('dark-mode') ? '☀️' : '🌙';
+        });
+
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark-mode');
+            themeToggle.textContent = '☀️';
+        }
+
+        // 3D Canvas Setup
+        const canvas = document.getElementById('canvas3d');
+        const ctx = canvas.getContext('2d');
+        canvas.width = canvas.offsetWidth;
+        canvas.height = 600;
+
+        let currentShape = 'cube';
+        let shapeColor = '#3498db';
+        let rotationX = 0, rotationY = 0, rotationZ = 0;
+        let scale = 1;
+        let brightness = 100;
+        let wireframe = false;
+        let animations = { rotate: false, bounce: false, pulse: false };
+        let animationFrame;
+
+        // 3D Point class
+        class Point3D {
+            constructor(x, y, z) {
+                this.x = x;
+                this.y = y;
+                this.z = z;
+            }
+
+            rotateX(angle) {
+                const rad = angle * Math.PI / 180;
+                const cos = Math.cos(rad);
+                const sin = Math.sin(rad);
+                const y = this.y * cos - this.z * sin;
+                const z = this.y * sin + this.z * cos;
+                return new Point3D(this.x, y, z);
+            }
+
+            rotateY(angle) {
+                const rad = angle * Math.PI / 180;
+                const cos = Math.cos(rad);
+                const sin = Math.sin(rad);
+                const x = this.x * cos + this.z * sin;
+                const z = -this.x * sin + this.z * cos;
+                return new Point3D(x, this.y, z);
+            }
+
+            rotateZ(angle) {
+                const rad = angle * Math.PI / 180;
+                const cos = Math.cos(rad);
+                const sin = Math.sin(rad);
+                const x = this.x * cos - this.y * sin;
+                const y = this.x * sin + this.y * cos;
+                return new Point3D(x, y, this.z);
+            }
+
+            project(width, height, fov, distance) {
+                const factor = fov / (distance + this.z);
+                const x = this.x * factor + width / 2;
+                const y = -this.y * factor + height / 2;
+                return { x, y };
+            }
+        }
+
+        // Shape definitions
+        function getCubeVertices() {
+            const size = 100;
+            return [
+                new Point3D(-size, -size, -size), new Point3D(size, -size, -size),
+                new Point3D(size, size, -size), new Point3D(-size, size, -size),
+                new Point3D(-size, -size, size), new Point3D(size, -size, size),
+                new Point3D(size, size, size), new Point3D(-size, size, size)
+            ];
+        }
+
+        function getSphereVertices() {
+            const vertices = [];
+            const radius = 100;
+            const segments = 20;
+            for (let i = 0; i <= segments; i++) {
+                const lat = (i * Math.PI) / segments;
+                for (let j = 0; j <= segments; j++) {
+                    const lon = (j * 2 * Math.PI) / segments;
+                    const x = radius * Math.sin(lat) * Math.cos(lon);
+                    const y = radius * Math.cos(lat);
+                    const z = radius * Math.sin(lat) * Math.sin(lon);
+                    vertices.push(new Point3D(x, y, z));
+                }
+            }
+            return vertices;
+        }
+
+        function getPyramidVertices() {
+            const size = 100;
+            return [
+                new Point3D(0, -size, 0),
+                new Point3D(-size, size, -size),
+                new Point3D(size, size, -size),
+                new Point3D(size, size, size),
+                new Point3D(-size, size, size)
+            ];
+        }
+
+        function getCylinderVertices() {
+            const vertices = [];
+            const radius = 80;
+            const height = 150;
+            const segments = 20;
+            for (let i = 0; i < 2; i++) {
+                const y = i === 0 ? -height / 2 : height / 2;
+                for (let j = 0; j <= segments; j++) {
+                    const angle = (j * 2 * Math.PI) / segments;
+                    const x = radius * Math.cos(angle);
+                    const z = radius * Math.sin(angle);
+                    vertices.push(new Point3D(x, y, z));
+                }
+            }
+            return vertices;
+        }
+
+        function getTorusVertices() {
+            const vertices = [];
+            const R = 80, r = 30;
+            const segments = 20;
+            for (let i = 0; i <= segments; i++) {
+                const u = (i * 2 * Math.PI) / segments;
+                for (let j = 0; j <= segments; j++) {
+                    const v = (j * 2 * Math.PI) / segments;
+                    const x = (R + r * Math.cos(v)) * Math.cos(u);
+                    const y = r * Math.sin(v);
+                    const z = (R + r * Math.cos(v)) * Math.sin(u);
+                    vertices.push(new Point3D(x, y, z));
+                }
+            }
+            return vertices;
+        }
+
+        function getConeVertices() {
+            const vertices = [];
+            const radius = 80;
+            const height = 150;
+            const segments = 20;
+            vertices.push(new Point3D(0, -height / 2, 0));
+            for (let i = 0; i <= segments; i++) {
+                const angle = (i * 2 * Math.PI) / segments;
+                const x = radius * Math.cos(angle);
+                const z = radius * Math.sin(angle);
+                vertices.push(new Point3D(x, height / 2, z));
+            }
+            return vertices;
+        }
+
+        function getVertices() {
+            switch(currentShape) {
+                case 'cube': return getCubeVertices();
+                case 'sphere': return getSphereVertices();
+                case 'pyramid': return getPyramidVertices();
+                case 'cylinder': return getCylinderVertices();
+                case 'torus': return getTorusVertices();
+                case 'cone': return getConeVertices();
+                default: return getCubeVertices();
+            }
+        }
+
+        function render() {
+            ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--bg');
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            let vertices = getVertices();
+
+            // Apply animations
+            if (animations.rotate) {
+                rotationY += 1;
+                document.getElementById('rotY').value = rotationY % 360;
+                document.getElementById('rotYValue').textContent = Math.round(rotationY % 360) + '°';
+            }
+
+            let currentScale = scale;
+            if (animations.pulse) {
+                currentScale = scale * (1 + 0.2 * Math.sin(Date.now() / 200));
+            }
+
+            let yOffset = 0;
+            if (animations.bounce) {
+                yOffset = 50 * Math.sin(Date.now() / 300);
+            }
+
+            // Transform vertices
+            vertices = vertices.map(v => {
+                let p = new Point3D(v.x * currentScale, v.y * currentScale, v.z * currentScale);
+                p = p.rotateX(rotationX);
+                p = p.rotateY(rotationY);
+                p = p.rotateZ(rotationZ);
+                p.y += yOffset;
+                return p;
+            });
+
+            // Project and draw
+            const projected = vertices.map(v => v.project(canvas.width, canvas.height, 400, 400));
+
+            // Draw shape
+            ctx.strokeStyle = shapeColor;
+            ctx.fillStyle = shapeColor + Math.round(brightness * 2.55 / 100 * 255).toString(16).padStart(2, '0');
+            ctx.lineWidth = 2;
+
+            if (wireframe) {
+                projected.forEach((p, i) => {
+                    if (i > 0) {
+                        ctx.beginPath();
+                        ctx.moveTo(projected[i - 1].x, projected[i - 1].y);
+                        ctx.lineTo(p.x, p.y);
+                        ctx.stroke();
+                    }
+                });
+            } else {
+                ctx.beginPath();
+                projected.forEach((p, i) => {
+                    if (i === 0) ctx.moveTo(p.x, p.y);
+                    else ctx.lineTo(p.x, p.y);
+                });
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+            }
+
+            animationFrame = requestAnimationFrame(render);
+        }
+
+        // Controls
+        document.getElementById('rotX').addEventListener('input', (e) => {
+            rotationX = parseInt(e.target.value);
+            document.getElementById('rotXValue').textContent = rotationX + '°';
+        });
+
+        document.getElementById('rotY').addEventListener('input', (e) => {
+            rotationY = parseInt(e.target.value);
+            document.getElementById('rotYValue').textContent = rotationY + '°';
+        });
+
+        document.getElementById('rotZ').addEventListener('input', (e) => {
+            rotationZ = parseInt(e.target.value);
+            document.getElementById('rotZValue').textContent = rotationZ + '°';
+        });
+
+        document.getElementById('scale').addEventListener('input', (e) => {
+            scale = parseFloat(e.target.value);
+            document.getElementById('scaleValue').textContent = scale.toFixed(1) + 'x';
+        });
+
+        document.getElementById('brightness').addEventListener('input', (e) => {
+            brightness = parseInt(e.target.value);
+            document.getElementById('brightnessValue').textContent = brightness + '%';
+        });
+
+        document.getElementById('shapeColor').addEventListener('input', (e) => {
+            shapeColor = e.target.value;
+        });
+
+        function changeShape(shape) {
+            currentShape = shape;
+            document.querySelectorAll('.shape-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        function randomColor() {
+            shapeColor = '#' + Math.floor(Math.random()*16777215).toString(16);
+            document.getElementById('shapeColor').value = shapeColor;
+        }
+
+        function toggleAnimation(type) {
+            animations[type] = !animations[type];
+        }
+
+        function stopAllAnimations() {
+            animations = { rotate: false, bounce: false, pulse: false };
+        }
+
+        function toggleWireframe() {
+            wireframe = !wireframe;
+        }
+
+        // Mouse interaction
+        let isDragging = false;
+        let lastX, lastY;
+
+        canvas.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            lastX = e.clientX;
+            lastY = e.clientY;
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            if (isDragging) {
+                const deltaX = e.clientX - lastX;
+                const deltaY = e.clientY - lastY;
+
+                rotationY += deltaX * 0.5;
+                rotationX += deltaY * 0.5;
+
+                document.getElementById('rotX').value = rotationX % 360;
+                document.getElementById('rotY').value = rotationY % 360;
+                document.getElementById('rotXValue').textContent = Math.round(rotationX % 360) + '°';
+                document.getElementById('rotYValue').textContent = Math.round(rotationY % 360) + '°';
+
+                lastX = e.clientX;
+                lastY = e.clientY;
+            }
+        });
+
+        canvas.addEventListener('mouseup', () => {
+            isDragging = false;
+        });
+
+        canvas.addEventListener('mouseleave', () => {
+            isDragging = false;
+        });
+
+        // Start rendering
+        render();
+    </script>
+</body>
+</html>
