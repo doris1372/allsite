@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Theme Designer - AllSite</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .designer-container {
+            max-width: 1600px;
+            margin: 2rem auto;
+            padding: 2rem;
+        }
+
+        .designer-layout {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .themes-panel {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px var(--shadow);
+            max-height: 800px;
+            overflow-y: auto;
+        }
+
+        .themes-panel h3 {
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+        }
+
+        .theme-item {
+            padding: 1rem;
+            margin: 0.5rem 0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .theme-item:hover {
+            border-color: var(--primary);
+            transform: translateX(5px);
+        }
+
+        .theme-item.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .theme-preview {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 2px solid white;
+        }
+
+        .preview-frame {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 5px 15px var(--shadow);
+            min-height: 800px;
+        }
+
+        .preview-content {
+            background: white;
+            border-radius: 10px;
+            padding: 2rem;
+            min-height: 700px;
+        }
+
+        .preview-navbar {
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .preview-card {
+            padding: 2rem;
+            border-radius: 15px;
+            margin: 1rem 0;
+        }
+
+        .preview-button {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .controls-panel {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 15px;
+            margin-top: 2rem;
+            box-shadow: 0 5px 15px var(--shadow);
+        }
+
+        .control-group {
+            margin: 1.5rem 0;
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+
+        .control-group input[type="color"] {
+            width: 100%;
+            height: 50px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+        }
+
+        .action-buttons button {
+            padding: 1rem 2rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1rem;
+        }
+
+        .action-buttons button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px var(--shadow);
+        }
+
+        @media (max-width: 1200px) {
+            .designer-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">🎨 Theme Designer</div>
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="drawing.html">Drawing</a></li>
+            <li><a href="music.html">Music</a></li>
+            <li><a href="quiz.html">Quiz</a></li>
+            <li><a href="casino.html">Casino</a></li>
+            <li><a href="ru.html">RU</a></li>
+            <li><a href="index.html">EN</a></li>
+        </ul>
+        <button class="theme-toggle" id="themeToggle">🌙</button>
+    </nav>
+
+    <div class="designer-container">
+        <h1 style="text-align: center;">🎨 Theme Designer - 20 Amazing Themes</h1>
+
+        <div class="action-buttons">
+            <button onclick="exportTheme()">💾 Export Theme</button>
+            <button onclick="applyToSite()">✨ Apply to Site</button>
+            <button onclick="resetTheme()">🔄 Reset</button>
+            <button onclick="randomTheme()">🎲 Random Theme</button>
+        </div>
+
+        <div class="designer-layout">
+            <div class="themes-panel">
+                <h3>🎨 Preset Themes</h3>
+                <div id="themesList"></div>
+            </div>
+
+            <div>
+                <div class="preview-frame">
+                    <div class="preview-content" id="previewContent">
+                        <div class="preview-navbar" id="previewNav">
+                            <h2>Website Preview</h2>
+                            <button class="preview-button" id="previewBtn">Click Me</button>
+                        </div>
+
+                        <div class="preview-card" id="previewCard1">
+                            <h3>Card Title 1</h3>
+                            <p>This is a preview of how your theme will look. Try different themes from the left panel!</p>
+                        </div>
+
+                        <div class="preview-card" id="previewCard2">
+                            <h3>Card Title 2</h3>
+                            <p>Each theme has unique colors, gradients, and styling. Pick your favorite!</p>
+                        </div>
+
+                        <div class="preview-card" id="previewCard3">
+                            <h3>Card Title 3</h3>
+                            <p>You can also customize colors manually using the controls below.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="controls-panel">
+                    <h3>🎨 Custom Colors</h3>
+                    <div class="control-group">
+                        <label>Primary Color</label>
+                        <input type="color" id="primaryColor" value="#667eea" onchange="updateCustomTheme()">
+                    </div>
+                    <div class="control-group">
+                        <label>Secondary Color</label>
+                        <input type="color" id="secondaryColor" value="#764ba2" onchange="updateCustomTheme()">
+                    </div>
+                    <div class="control-group">
+                        <label>Accent Color</label>
+                        <input type="color" id="accentColor" value="#f093fb" onchange="updateCustomTheme()">
+                    </div>
+                    <div class="control-group">
+                        <label>Background Color</label>
+                        <input type="color" id="bgColor" value="#ffffff" onchange="updateCustomTheme()">
+                    </div>
+                    <div class="control-group">
+                        <label>Text Color</label>
+                        <input type="color" id="textColor" value="#333333" onchange="updateCustomTheme()">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Theme Toggle
+        const themeToggle = document.getElementById('themeToggle');
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            themeToggle.textContent = document.body.classList.contains('dark-mode') ? '☀️' : '🌙';
+            localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+        });
+
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark-mode');
+            themeToggle.textContent = '☀️';
+        }
+
+        // 20 Amazing Themes
+        const themes = [
+            {
+                name: '🌊 Ocean Breeze',
+                primary: '#0077be',
+                secondary: '#00a8e8',
+                accent: '#00d4ff',
+                bg: '#f0f8ff',
+                text: '#003d5c',
+                gradient: 'linear-gradient(135deg, #0077be 0%, #00d4ff 100%)'
+            },
+            {
+                name: '🌸 Cherry Blossom',
+                primary: '#ff6b9d',
+                secondary: '#c44569',
+                accent: '#ffa8c5',
+                bg: '#fff5f8',
+                text: '#5a1f3a',
+                gradient: 'linear-gradient(135deg, #ff6b9d 0%, #c44569 100%)'
+            },
+            {
+                name: '🌲 Forest Green',
+                primary: '#2d6a4f',
+                secondary: '#40916c',
+                accent: '#52b788',
+                bg: '#f1faee',
+                text: '#1b4332',
+                gradient: 'linear-gradient(135deg, #2d6a4f 0%, #52b788 100%)'
+            },
+            {
+                name: '🔥 Fire Sunset',
+                primary: '#ff6b35',
+                secondary: '#f7931e',
+                accent: '#fdc500',
+                bg: '#fff8f0',
+                text: '#8b3a00',
+                gradient: 'linear-gradient(135deg, #ff6b35 0%, #fdc500 100%)'
+            },
+            {
+                name: '💜 Purple Dream',
+                primary: '#667eea',
+                secondary: '#764ba2',
+                accent: '#f093fb',
+                bg: '#f8f7ff',
+                text: '#3d2c5a',
+                gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+            },
+            {
+                name: '🌙 Midnight Blue',
+                primary: '#1e3a8a',
+                secondary: '#3b82f6',
+                accent: '#60a5fa',
+                bg: '#eff6ff',
+                text: '#1e293b',
+                gradient: 'linear-gradient(135deg, #1e3a8a 0%, #60a5fa 100%)'
+            },
+            {
+                name: '🍊 Citrus Burst',
+                primary: '#fb8500',
+                secondary: '#ffb703',
+                accent: '#ffd60a',
+                bg: '#fffbf0',
+                text: '#6b4e00',
+                gradient: 'linear-gradient(135deg, #fb8500 0%, #ffd60a 100%)'
+            },
+            {
+                name: '🌺 Tropical Paradise',
+                primary: '#e63946',
+                secondary: '#f77f00',
+                accent: '#fcbf49',
+                bg: '#fff9f0',
+                text: '#6d1f1f',
+                gradient: 'linear-gradient(135deg, #e63946 0%, #fcbf49 100%)'
+            },
+            {
+                name: '❄️ Arctic Ice',
+                primary: '#4cc9f0',
+                secondary: '#4895ef',
+                accent: '#7209b7',
+                bg: '#f0f9ff',
+                text: '#1e3a5f',
+                gradient: 'linear-gradient(135deg, #4cc9f0 0%, #7209b7 100%)'
+            },
+            {
+                name: '🍇 Royal Purple',
+                primary: '#5a189a',
+                secondary: '#7209b7',
+                accent: '#9d4edd',
+                bg: '#f8f0ff',
+                text: '#3c096c',
+                gradient: 'linear-gradient(135deg, #5a189a 0%, #9d4edd 100%)'
+            },
+            {
+                name: '🌹 Rose Gold',
+                primary: '#d4af37',
+                secondary: '#e5b47f',
+                accent: '#f4c2c2',
+                bg: '#fff8f0',
+                text: '#6b4423',
+                gradient: 'linear-gradient(135deg, #d4af37 0%, #f4c2c2 100%)'
+            },
+            {
+                name: '🌿 Mint Fresh',
+                primary: '#06d6a0',
+                secondary: '#1dd3b0',
+                accent: '#b8f2e6',
+                bg: '#f0fff8',
+                text: '#004d40',
+                gradient: 'linear-gradient(135deg, #06d6a0 0%, #b8f2e6 100%)'
+            },
+            {
+                name: '🎨 Neon Glow',
+                primary: '#ff006e',
+                secondary: '#8338ec',
+                accent: '#3a86ff',
+                bg: '#fff0f8',
+                text: '#1a0033',
+                gradient: 'linear-gradient(135deg, #ff006e 0%, #3a86ff 100%)'
+            },
+            {
+                name: '🏜️ Desert Sand',
+                primary: '#d4a574',
+                secondary: '#e6b89c',
+                accent: '#ead2ac',
+                bg: '#faf8f3',
+                text: '#5c4a3a',
+                gradient: 'linear-gradient(135deg, #d4a574 0%, #ead2ac 100%)'
+            },
+            {
+                name: '🌌 Galaxy Space',
+                primary: '#2b2d42',
+                secondary: '#8d99ae',
+                accent: '#edf2f4',
+                bg: '#f8f9fa',
+                text: '#2b2d42',
+                gradient: 'linear-gradient(135deg, #2b2d42 0%, #8d99ae 100%)'
+            },
+            {
+                name: '🍓 Strawberry Cream',
+                primary: '#ff4d6d',
+                secondary: '#ff758f',
+                accent: '#ffb3c1',
+                bg: '#fff5f7',
+                text: '#7d1e2e',
+                gradient: 'linear-gradient(135deg, #ff4d6d 0%, #ffb3c1 100%)'
+            },
+            {
+                name: '⚡ Electric Blue',
+                primary: '#0096c7',
+                secondary: '#00b4d8',
+                accent: '#48cae4',
+                bg: '#f0faff',
+                text: '#023e8a',
+                gradient: 'linear-gradient(135deg, #0096c7 0%, #48cae4 100%)'
+            },
+            {
+                name: '🍂 Autumn Leaves',
+                primary: '#bc4749',
+                secondary: '#d4a373',
+                accent: '#f2cc8f',
+                bg: '#fdf8f3',
+                text: '#6b2d2d',
+                gradient: 'linear-gradient(135deg, #bc4749 0%, #f2cc8f 100%)'
+            },
+            {
+                name: '🦋 Butterfly Garden',
+                primary: '#ff6d00',
+                secondary: '#ff9e00',
+                accent: '#ffd60a',
+                bg: '#fffbf0',
+                text: '#7d3c00',
+                gradient: 'linear-gradient(135deg, #ff6d00 0%, #ffd60a 100%)'
+            },
+            {
+                name: '🌈 Rainbow Magic',
+                primary: '#ff0080',
+                secondary: '#ff8c00',
+                accent: '#40e0d0',
+                bg: '#fff8ff',
+                text: '#4a0040',
+                gradient: 'linear-gradient(135deg, #ff0080 0%, #ff8c00 50%, #40e0d0 100%)'
+            }
+        ];
+
+        let currentTheme = themes[4]; // Default to Purple Dream
+
+        // Render themes list
+        const themesList = document.getElementById('themesList');
+        themes.forEach((theme, index) => {
+            const item = document.createElement('div');
+            item.className = 'theme-item' + (index === 4 ? ' active' : '');
+            item.innerHTML = `
+                <div class="theme-preview" style="background: ${theme.gradient}"></div>
+                <span>${theme.name}</span>
+            `;
+            item.onclick = () => applyTheme(theme, item);
+            themesList.appendChild(item);
+        });
+
+        function applyTheme(theme, element) {
+            currentTheme = theme;
+
+            // Update active state
+            document.querySelectorAll('.theme-item').forEach(item => item.classList.remove('active'));
+            if (element) element.classList.add('active');
+
+            // Update preview
+            const previewContent = document.getElementById('previewContent');
+            previewContent.style.background = theme.bg;
+            previewContent.style.color = theme.text;
+
+            const previewNav = document.getElementById('previewNav');
+            previewNav.style.background = theme.gradient;
+            previewNav.style.color = 'white';
+
+            const previewBtn = document.getElementById('previewBtn');
+            previewBtn.style.background = theme.accent;
+            previewBtn.style.color = theme.text;
+
+            const cards = [
+                document.getElementById('previewCard1'),
+                document.getElementById('previewCard2'),
+                document.getElementById('previewCard3')
+            ];
+
+            cards.forEach((card, i) => {
+                if (i === 0) {
+                    card.style.background = theme.gradient;
+                    card.style.color = 'white';
+                } else if (i === 1) {
+                    card.style.background = theme.accent;
+                    card.style.color = theme.text;
+                } else {
+                    card.style.background = theme.primary;
+                    card.style.color = 'white';
+                }
+            });
+
+            // Update color pickers
+            document.getElementById('primaryColor').value = theme.primary;
+            document.getElementById('secondaryColor').value = theme.secondary;
+            document.getElementById('accentColor').value = theme.accent;
+            document.getElementById('bgColor').value = theme.bg;
+            document.getElementById('textColor').value = theme.text;
+        }
+
+        function updateCustomTheme() {
+            const customTheme = {
+                name: '🎨 Custom Theme',
+                primary: document.getElementById('primaryColor').value,
+                secondary: document.getElementById('secondaryColor').value,
+                accent: document.getElementById('accentColor').value,
+                bg: document.getElementById('bgColor').value,
+                text: document.getElementById('textColor').value,
+                gradient: `linear-gradient(135deg, ${document.getElementById('primaryColor').value} 0%, ${document.getElementById('secondaryColor').value} 100%)`
+            };
+
+            applyTheme(customTheme, null);
+        }
+
+        function exportTheme() {
+            const css = `
+/* ${currentTheme.name} Theme */
+:root {
+    --primary: ${currentTheme.primary};
+    --secondary: ${currentTheme.secondary};
+    --accent: ${currentTheme.accent};
+    --bg: ${currentTheme.bg};
+    --text: ${currentTheme.text};
+    --gradient: ${currentTheme.gradient};
+}
+
+body {
+    background: var(--bg);
+    color: var(--text);
+}
+
+.navbar {
+    background: var(--gradient);
+}
+
+.btn-primary {
+    background: var(--primary);
+    color: white;
+}
+
+.card {
+    background: var(--accent);
+    color: var(--text);
+}
+`;
+
+            const blob = new Blob([css], { type: 'text/css' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `theme-${currentTheme.name.replace(/[^a-z0-9]/gi, '-').toLowerCase()}.css`;
+            a.click();
+
+            alert('✅ Theme exported as CSS file!');
+        }
+
+        function applyToSite() {
+            localStorage.setItem('customTheme', JSON.stringify(currentTheme));
+            alert('✅ Theme saved! Refresh any page to see the changes.');
+        }
+
+        function resetTheme() {
+            applyTheme(themes[4], document.querySelectorAll('.theme-item')[4]);
+        }
+
+        function randomTheme() {
+            const randomIndex = Math.floor(Math.random() * themes.length);
+            applyTheme(themes[randomIndex], document.querySelectorAll('.theme-item')[randomIndex]);
+        }
+
+        // Initialize with default theme
+        applyTheme(currentTheme, document.querySelector('.theme-item.active'));
+    </script>
+</body>
+</html>
