@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drawing Board - AllSite</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .drawing-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 2rem;
+        }
+
+        #drawingCanvas {
+            border: 3px solid var(--primary);
+            border-radius: 10px;
+            cursor: crosshair;
+            display: block;
+            margin: 2rem auto;
+            background: white;
+            box-shadow: 0 10px 30px var(--shadow);
+        }
+
+        .drawing-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            justify-content: center;
+            margin: 2rem 0;
+        }
+
+        .tool-btn {
+            padding: 1rem 1.5rem;
+            font-size: 1.2rem;
+            border: 2px solid var(--primary);
+            background: var(--card-bg);
+            color: var(--text);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .tool-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .tool-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px var(--shadow);
+        }
+
+        .color-palette {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+
+        .color-option {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .color-option:hover {
+            transform: scale(1.2);
+        }
+
+        .color-option.active {
+            border-color: var(--text);
+            box-shadow: 0 0 10px rgba(0,0,0,0.3);
+        }
+
+        .size-slider {
+            width: 100%;
+            max-width: 300px;
+            margin: 1rem auto;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">🎨 Drawing Board</div>
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="drawing.html">Drawing</a></li>
+            <li><a href="music.html">Music</a></li>
+            <li><a href="quiz.html">Quiz</a></li>
+        </ul>
+        <button class="theme-toggle" id="themeToggle">🌙</button>
+    </nav>
+
+    <div class="drawing-container">
+        <h1 style="text-align: center;">🎨 Drawing Board</h1>
+
+        <canvas id="drawingCanvas" width="1000" height="600"></canvas>
+
+        <div class="drawing-controls">
+            <button class="tool-btn active" onclick="setTool('pen')">✏️ Pen</button>
+            <button class="tool-btn" onclick="setTool('eraser')">🧹 Eraser</button>
+            <button class="tool-btn" onclick="setTool('line')">📏 Line</button>
+            <button class="tool-btn" onclick="setTool('rectangle')">⬜ Rectangle</button>
+            <button class="tool-btn" onclick="setTool('circle')">⭕ Circle</button>
+            <button class="tool-btn" onclick="setTool('fill')">🪣 Fill</button>
+            <button class="tool-btn" onclick="clearCanvas()">🗑️ Clear</button>
+            <button class="tool-btn" onclick="saveDrawing()">💾 Save</button>
+            <button class="tool-btn" onclick="loadDrawing()">📂 Load</button>
+        </div>
+
+        <div style="text-align: center;">
+            <label>Brush Size: <span id="sizeValue">5</span>px</label>
+            <input type="range" class="size-slider" id="brushSize" min="1" max="50" value="5">
+        </div>
+
+        <div class="color-palette" id="colorPalette"></div>
+
+        <div style="text-align: center; margin-top: 2rem;">
+            <input type="color" id="customColor" value="#000000">
+            <label>Custom Color</label>
+        </div>
+    </div>
+
+    <script>
+        // Theme Toggle
+        const themeToggle = document.getElementById('themeToggle');
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            themeToggle.textContent = document.body.classList.contains('dark-mode') ? '☀️' : '🌙';
+        });
+
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark-mode');
+            themeToggle.textContent = '☀️';
+        }
+
+        // Drawing App
+        const canvas = document.getElementById('drawingCanvas');
+        const ctx = canvas.getContext('2d');
+        let isDrawing = false;
+        let currentTool = 'pen';
+        let currentColor = '#000000';
+        let brushSize = 5;
+        let startX, startY;
+
+        // Color Palette
+        const colors = [
+            '#000000', '#FFFFFF', '#FF0000', '#00FF00', '#0000FF',
+            '#FFFF00', '#FF00FF', '#00FFFF', '#FFA500', '#800080',
+            '#FFC0CB', '#A52A2A', '#808080', '#FFD700', '#4B0082',
+            '#FF1493', '#00CED1', '#32CD32', '#FF4500', '#9370DB'
+        ];
+
+        const palette = document.getElementById('colorPalette');
+        colors.forEach(color => {
+            const div = document.createElement('div');
+            div.className = 'color-option';
+            div.style.background = color;
+            if (color === currentColor) div.classList.add('active');
+            div.onclick = () => {
+                currentColor = color;
+                document.querySelectorAll('.color-option').forEach(el => el.classList.remove('active'));
+                div.classList.add('active');
+            };
+            palette.appendChild(div);
+        });
+
+        document.getElementById('customColor').addEventListener('input', (e) => {
+            currentColor = e.target.value;
+        });
+
+        document.getElementById('brushSize').addEventListener('input', (e) => {
+            brushSize = e.target.value;
+            document.getElementById('sizeValue').textContent = brushSize;
+        });
+
+        function setTool(tool) {
+            currentTool = tool;
+            document.querySelectorAll('.tool-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        canvas.addEventListener('mousedown', (e) => {
+            isDrawing = true;
+            startX = e.offsetX;
+            startY = e.offsetY;
+
+            if (currentTool === 'pen' || currentTool === 'eraser') {
+                ctx.beginPath();
+                ctx.moveTo(startX, startY);
+            }
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            if (!isDrawing) return;
+
+            const x = e.offsetX;
+            const y = e.offsetY;
+
+            if (currentTool === 'pen') {
+                ctx.strokeStyle = currentColor;
+                ctx.lineWidth = brushSize;
+                ctx.lineCap = 'round';
+                ctx.lineTo(x, y);
+                ctx.stroke();
+            } else if (currentTool === 'eraser') {
+                ctx.strokeStyle = '#FFFFFF';
+                ctx.lineWidth = brushSize * 2;
+                ctx.lineCap = 'round';
+                ctx.lineTo(x, y);
+                ctx.stroke();
+            }
+        });
+
+        canvas.addEventListener('mouseup', (e) => {
+            if (!isDrawing) return;
+            isDrawing = false;
+
+            const x = e.offsetX;
+            const y = e.offsetY;
+
+            if (currentTool === 'line') {
+                ctx.strokeStyle = currentColor;
+                ctx.lineWidth = brushSize;
+                ctx.beginPath();
+                ctx.moveTo(startX, startY);
+                ctx.lineTo(x, y);
+                ctx.stroke();
+            } else if (currentTool === 'rectangle') {
+                ctx.strokeStyle = currentColor;
+                ctx.lineWidth = brushSize;
+                ctx.strokeRect(startX, startY, x - startX, y - startY);
+            } else if (currentTool === 'circle') {
+                ctx.strokeStyle = currentColor;
+                ctx.lineWidth = brushSize;
+                ctx.beginPath();
+                const radius = Math.sqrt(Math.pow(x - startX, 2) + Math.pow(y - startY, 2));
+                ctx.arc(startX, startY, radius, 0, 2 * Math.PI);
+                ctx.stroke();
+            } else if (currentTool === 'fill') {
+                ctx.fillStyle = currentColor;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            }
+        });
+
+        function clearCanvas() {
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+
+        function saveDrawing() {
+            const link = document.createElement('a');
+            link.download = 'drawing.png';
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+
+        function loadDrawing() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.onchange = (e) => {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        ctx.drawImage(img, 0, 0);
+                    };
+                    img.src = event.target.result;
+                };
+                reader.readAsDataURL(file);
+            };
+            input.click();
+        }
+
+        // Initialize with white background
+        clearCanvas();
+    </script>
+</body>
+</html>

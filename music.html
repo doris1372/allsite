@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Studio - AllSite</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .music-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 2rem;
+        }
+
+        .piano {
+            display: flex;
+            justify-content: center;
+            margin: 2rem 0;
+            position: relative;
+            height: 300px;
+        }
+
+        .key {
+            width: 60px;
+            height: 250px;
+            background: white;
+            border: 2px solid #333;
+            cursor: pointer;
+            transition: all 0.1s;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding-bottom: 1rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .key:hover {
+            background: #f0f0f0;
+        }
+
+        .key:active {
+            background: #ddd;
+            transform: translateY(2px);
+        }
+
+        .key.black {
+            width: 40px;
+            height: 150px;
+            background: #333;
+            color: white;
+            position: absolute;
+            z-index: 2;
+            margin-left: -20px;
+        }
+
+        .key.black:hover {
+            background: #555;
+        }
+
+        .key.black:active {
+            background: #000;
+        }
+
+        .drums {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .drum-pad {
+            aspect-ratio: 1;
+            background: var(--primary);
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.1s;
+            font-size: 2rem;
+            color: white;
+            box-shadow: 0 5px 15px var(--shadow);
+        }
+
+        .drum-pad:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px var(--shadow);
+        }
+
+        .drum-pad:active {
+            transform: scale(0.95);
+            background: var(--secondary);
+        }
+
+        .sequencer {
+            margin: 2rem 0;
+        }
+
+        .sequencer-grid {
+            display: grid;
+            grid-template-columns: repeat(16, 1fr);
+            gap: 2px;
+            margin: 1rem 0;
+        }
+
+        .sequencer-cell {
+            aspect-ratio: 1;
+            background: var(--card-bg);
+            border: 1px solid #ddd;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .sequencer-cell.active {
+            background: var(--primary);
+        }
+
+        .sequencer-cell.playing {
+            background: var(--secondary);
+            transform: scale(1.1);
+        }
+
+        .metronome {
+            text-align: center;
+            margin: 2rem 0;
+        }
+
+        .bpm-display {
+            font-size: 3rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin: 1rem 0;
+        }
+
+        .visualizer {
+            width: 100%;
+            height: 200px;
+            background: var(--card-bg);
+            border-radius: 10px;
+            margin: 2rem 0;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">🎵 Music Studio</div>
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="drawing.html">Drawing</a></li>
+            <li><a href="music.html">Music</a></li>
+            <li><a href="quiz.html">Quiz</a></li>
+        </ul>
+        <button class="theme-toggle" id="themeToggle">🌙</button>
+    </nav>
+
+    <div class="music-container">
+        <h1 style="text-align: center;">🎵 Music Studio</h1>
+
+        <section class="section">
+            <h2>🎹 Virtual Piano</h2>
+            <div class="piano" id="piano"></div>
+            <div style="text-align: center;">
+                <button onclick="playMelody()">🎼 Play Demo Melody</button>
+                <button onclick="recordToggle()">⏺️ Record</button>
+                <button onclick="playRecording()">▶️ Play Recording</button>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2>🥁 Drum Machine</h2>
+            <div class="drums" id="drums"></div>
+        </section>
+
+        <section class="section">
+            <h2>🎛️ Step Sequencer</h2>
+            <div class="sequencer">
+                <div style="text-align: center; margin-bottom: 1rem;">
+                    <button onclick="toggleSequencer()">▶️ Play/Stop</button>
+                    <button onclick="clearSequencer()">🗑️ Clear</button>
+                    <label>BPM: <input type="number" id="seqBPM" value="120" min="60" max="200" style="width: 80px;"></label>
+                </div>
+                <div id="sequencerTracks"></div>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2>⏱️ Metronome</h2>
+            <div class="metronome">
+                <div class="bpm-display" id="bpmDisplay">120</div>
+                <input type="range" min="40" max="240" value="120" id="bpmSlider" style="width: 300px;">
+                <div>
+                    <button onclick="startMetronome()">▶️ Start</button>
+                    <button onclick="stopMetronome()">⏹️ Stop</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2>📊 Audio Visualizer</h2>
+            <canvas id="visualizer" class="visualizer"></canvas>
+        </section>
+    </div>
+
+    <script>
+        // Theme Toggle
+        const themeToggle = document.getElementById('themeToggle');
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            themeToggle.textContent = document.body.classList.contains('dark-mode') ? '☀️' : '🌙';
+        });
+
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark-mode');
+            themeToggle.textContent = '☀️';
+        }
+
+        // Audio Context
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+        // Piano
+        const notes = [
+            {note: 'C', freq: 261.63, key: 'A'},
+            {note: 'C#', freq: 277.18, key: 'W', black: true},
+            {note: 'D', freq: 293.66, key: 'S'},
+            {note: 'D#', freq: 311.13, key: 'E', black: true},
+            {note: 'E', freq: 329.63, key: 'D'},
+            {note: 'F', freq: 349.23, key: 'F'},
+            {note: 'F#', freq: 369.99, key: 'T', black: true},
+            {note: 'G', freq: 392.00, key: 'G'},
+            {note: 'G#', freq: 415.30, key: 'Y', black: true},
+            {note: 'A', freq: 440.00, key: 'H'},
+            {note: 'A#', freq: 466.16, key: 'U', black: true},
+            {note: 'B', freq: 493.88, key: 'J'},
+            {note: 'C2', freq: 523.25, key: 'K'}
+        ];
+
+        const piano = document.getElementById('piano');
+        let whiteKeyIndex = 0;
+
+        notes.forEach((note, index) => {
+            const key = document.createElement('div');
+            key.className = note.black ? 'key black' : 'key';
+            key.textContent = note.key;
+            key.onclick = () => playNote(note.freq);
+
+            if (note.black) {
+                key.style.left = `${whiteKeyIndex * 60 - 20}px`;
+            } else {
+                whiteKeyIndex++;
+            }
+
+            piano.appendChild(key);
+        });
+
+        function playNote(frequency, duration = 0.3) {
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            oscillator.frequency.value = frequency;
+            oscillator.type = 'sine';
+
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + duration);
+        }
+
+        // Keyboard support
+        document.addEventListener('keydown', (e) => {
+            const note = notes.find(n => n.key === e.key.toUpperCase());
+            if (note) playNote(note.freq);
+        });
+
+        // Recording
+        let recording = [];
+        let isRecording = false;
+        let recordStartTime;
+
+        function recordToggle() {
+            isRecording = !isRecording;
+            if (isRecording) {
+                recording = [];
+                recordStartTime = Date.now();
+                alert('Recording started!');
+            } else {
+                alert('Recording stopped!');
+            }
+        }
+
+        function playRecording() {
+            recording.forEach(({freq, time}) => {
+                setTimeout(() => playNote(freq), time);
+            });
+        }
+
+        function playMelody() {
+            const melody = [
+                {freq: 261.63, delay: 0},
+                {freq: 293.66, delay: 300},
+                {freq: 329.63, delay: 600},
+                {freq: 349.23, delay: 900},
+                {freq: 392.00, delay: 1200},
+                {freq: 440.00, delay: 1500},
+                {freq: 493.88, delay: 1800},
+                {freq: 523.25, delay: 2100}
+            ];
+
+            melody.forEach(({freq, delay}) => {
+                setTimeout(() => playNote(freq), delay);
+            });
+        }
+
+        // Drums
+        const drumSounds = [
+            {name: 'Kick', emoji: '🥁', freq: 60},
+            {name: 'Snare', emoji: '🎵', freq: 200},
+            {name: 'Hi-Hat', emoji: '🎶', freq: 800},
+            {name: 'Tom', emoji: '🎼', freq: 150},
+            {name: 'Clap', emoji: '👏', freq: 1000},
+            {name: 'Crash', emoji: '💥', freq: 1500},
+            {name: 'Ride', emoji: '🔔', freq: 1200},
+            {name: 'Cowbell', emoji: '🔊', freq: 600}
+        ];
+
+        const drumsContainer = document.getElementById('drums');
+        drumSounds.forEach(drum => {
+            const pad = document.createElement('div');
+            pad.className = 'drum-pad';
+            pad.innerHTML = `<div style="font-size: 3rem;">${drum.emoji}</div><div>${drum.name}</div>`;
+            pad.onclick = () => playDrum(drum.freq);
+            drumsContainer.appendChild(pad);
+        });
+
+        function playDrum(frequency) {
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            oscillator.frequency.value = frequency;
+            oscillator.type = 'triangle';
+
+            gainNode.gain.setValueAtTime(0.5, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.1);
+        }
+
+        // Sequencer
+        const tracks = ['Kick', 'Snare', 'Hi-Hat', 'Tom'];
+        const sequencerData = tracks.map(() => Array(16).fill(false));
+        let sequencerPlaying = false;
+        let sequencerInterval;
+        let currentStep = 0;
+
+        const sequencerTracks = document.getElementById('sequencerTracks');
+        tracks.forEach((track, trackIndex) => {
+            const trackDiv = document.createElement('div');
+            trackDiv.innerHTML = `<h4>${track}</h4>`;
+            const grid = document.createElement('div');
+            grid.className = 'sequencer-grid';
+
+            for (let i = 0; i < 16; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'sequencer-cell';
+                cell.dataset.track = trackIndex;
+                cell.dataset.step = i;
+                cell.onclick = () => {
+                    sequencerData[trackIndex][i] = !sequencerData[trackIndex][i];
+                    cell.classList.toggle('active');
+                };
+                grid.appendChild(cell);
+            }
+
+            trackDiv.appendChild(grid);
+            sequencerTracks.appendChild(trackDiv);
+        });
+
+        function toggleSequencer() {
+            sequencerPlaying = !sequencerPlaying;
+
+            if (sequencerPlaying) {
+                const bpm = parseInt(document.getElementById('seqBPM').value);
+                const interval = (60 / bpm) * 1000 / 4;
+
+                sequencerInterval = setInterval(() => {
+                    playSequencerStep();
+                    currentStep = (currentStep + 1) % 16;
+                }, interval);
+            } else {
+                clearInterval(sequencerInterval);
+                currentStep = 0;
+            }
+        }
+
+        function playSequencerStep() {
+            document.querySelectorAll('.sequencer-cell').forEach(cell => {
+                cell.classList.remove('playing');
+            });
+
+            sequencerData.forEach((track, trackIndex) => {
+                if (track[currentStep]) {
+                    playDrum(drumSounds[trackIndex].freq);
+
+                    const cell = document.querySelector(`[data-track="${trackIndex}"][data-step="${currentStep}"]`);
+                    cell.classList.add('playing');
+                }
+            });
+        }
+
+        function clearSequencer() {
+            sequencerData.forEach(track => track.fill(false));
+            document.querySelectorAll('.sequencer-cell').forEach(cell => {
+                cell.classList.remove('active');
+            });
+        }
+
+        // Metronome
+        let metronomeInterval;
+        let metronomePlaying = false;
+
+        document.getElementById('bpmSlider').addEventListener('input', (e) => {
+            document.getElementById('bpmDisplay').textContent = e.target.value;
+        });
+
+        function startMetronome() {
+            if (metronomePlaying) return;
+            metronomePlaying = true;
+
+            const bpm = parseInt(document.getElementById('bpmSlider').value);
+            const interval = (60 / bpm) * 1000;
+
+            metronomeInterval = setInterval(() => {
+                playNote(800, 0.05);
+            }, interval);
+        }
+
+        function stopMetronome() {
+            metronomePlaying = false;
+            clearInterval(metronomeInterval);
+        }
+
+        // Visualizer
+        const visualizerCanvas = document.getElementById('visualizer');
+        const vizCtx = visualizerCanvas.getContext('2d');
+        visualizerCanvas.width = visualizerCanvas.offsetWidth;
+        visualizerCanvas.height = 200;
+
+        function drawVisualizer() {
+            vizCtx.fillStyle = getComputedStyle(document.body).getPropertyValue('--card-bg');
+            vizCtx.fillRect(0, 0, visualizerCanvas.width, visualizerCanvas.height);
+
+            vizCtx.fillStyle = getComputedStyle(document.body).getPropertyValue('--primary');
+
+            for (let i = 0; i < 50; i++) {
+                const height = Math.random() * 150 + 20;
+                const x = (visualizerCanvas.width / 50) * i;
+                vizCtx.fillRect(x, visualizerCanvas.height - height, visualizerCanvas.width / 50 - 2, height);
+            }
+
+            requestAnimationFrame(drawVisualizer);
+        }
+
+        drawVisualizer();
+    </script>
+</body>
+</html>

@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Master - AllSite</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .quiz-container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 2rem;
+        }
+
+        .quiz-card {
+            background: var(--card-bg);
+            padding: 3rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px var(--shadow);
+            margin: 2rem 0;
+        }
+
+        .question {
+            font-size: 1.8rem;
+            margin-bottom: 2rem;
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        .options {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .option {
+            padding: 1.5rem;
+            background: var(--bg);
+            border: 3px solid var(--primary);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1.1rem;
+        }
+
+        .option:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateX(10px);
+        }
+
+        .option.correct {
+            background: var(--secondary);
+            color: white;
+            border-color: var(--secondary);
+        }
+
+        .option.wrong {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        .quiz-progress {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+            font-size: 1.2rem;
+        }
+
+        .score-display {
+            text-align: center;
+            font-size: 3rem;
+            color: var(--primary);
+            margin: 2rem 0;
+        }
+
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .category-card {
+            padding: 2rem;
+            background: var(--card-bg);
+            border-radius: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 3px solid transparent;
+        }
+
+        .category-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px var(--shadow);
+        }
+
+        .category-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .leaderboard {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 15px;
+            margin: 2rem 0;
+        }
+
+        .leaderboard-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            background: var(--bg);
+            border-radius: 10px;
+            align-items: center;
+        }
+
+        .rank {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary);
+            min-width: 50px;
+        }
+
+        .timer-display {
+            font-size: 2rem;
+            color: var(--accent);
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">🧠 Quiz Master</div>
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="drawing.html">Drawing</a></li>
+            <li><a href="music.html">Music</a></li>
+            <li><a href="quiz.html">Quiz</a></li>
+        </ul>
+        <button class="theme-toggle" id="themeToggle">🌙</button>
+    </nav>
+
+    <div class="quiz-container">
+        <h1 style="text-align: center;">🧠 Quiz Master</h1>
+
+        <div id="categorySelection">
+            <h2 style="text-align: center;">Choose a Category</h2>
+            <div class="category-grid">
+                <div class="category-card" onclick="startQuiz('general')">
+                    <div class="category-icon">🌍</div>
+                    <h3>General Knowledge</h3>
+                </div>
+                <div class="category-card" onclick="startQuiz('science')">
+                    <div class="category-icon">🔬</div>
+                    <h3>Science</h3>
+                </div>
+                <div class="category-card" onclick="startQuiz('history')">
+                    <div class="category-icon">📜</div>
+                    <h3>History</h3>
+                </div>
+                <div class="category-card" onclick="startQuiz('geography')">
+                    <div class="category-icon">🗺️</div>
+                    <h3>Geography</h3>
+                </div>
+                <div class="category-card" onclick="startQuiz('sports')">
+                    <div class="category-icon">⚽</div>
+                    <h3>Sports</h3>
+                </div>
+                <div class="category-card" onclick="startQuiz('movies')">
+                    <div class="category-icon">🎬</div>
+                    <h3>Movies</h3>
+                </div>
+                <div class="category-card" onclick="startQuiz('music')">
+                    <div class="category-icon">🎵</div>
+                    <h3>Music</h3>
+                </div>
+                <div class="category-card" onclick="startQuiz('tech')">
+                    <div class="category-icon">💻</div>
+                    <h3>Technology</h3>
+                </div>
+            </div>
+        </div>
+
+        <div id="quizGame" style="display: none;">
+            <div class="quiz-card">
+                <div class="quiz-progress">
+                    <span>Question <span id="currentQuestion">1</span> of <span id="totalQuestions">10</span></span>
+                    <span class="timer-display" id="timer">30</span>
+                </div>
+                <div class="question" id="question"></div>
+                <div class="options" id="options"></div>
+            </div>
+        </div>
+
+        <div id="quizResults" style="display: none;">
+            <div class="quiz-card">
+                <h2 style="text-align: center;">Quiz Complete! 🎉</h2>
+                <div class="score-display" id="finalScore"></div>
+                <div style="text-align: center;">
+                    <button onclick="location.reload()">🔄 Play Again</button>
+                    <button onclick="showLeaderboard()">🏆 Leaderboard</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="leaderboardSection" style="display: none;">
+            <div class="leaderboard">
+                <h2 style="text-align: center;">🏆 Leaderboard</h2>
+                <div id="leaderboardList"></div>
+                <div style="text-align: center; margin-top: 2rem;">
+                    <button onclick="location.reload()">🔄 Back to Quiz</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Theme Toggle
+        const themeToggle = document.getElementById('themeToggle');
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            themeToggle.textContent = document.body.classList.contains('dark-mode') ? '☀️' : '🌙';
+        });
+
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark-mode');
+            themeToggle.textContent = '☀️';
+        }
+
+        // Quiz Data
+        const quizData = {
+            general: [
+                {q: "What is the capital of France?", options: ["London", "Berlin", "Paris", "Madrid"], answer: 2},
+                {q: "How many continents are there?", options: ["5", "6", "7", "8"], answer: 2},
+                {q: "What is the largest ocean?", options: ["Atlantic", "Indian", "Arctic", "Pacific"], answer: 3},
+                {q: "Who painted the Mona Lisa?", options: ["Van Gogh", "Da Vinci", "Picasso", "Monet"], answer: 1},
+                {q: "What year did World War II end?", options: ["1943", "1944", "1945", "1946"], answer: 2},
+                {q: "What is the smallest country?", options: ["Monaco", "Vatican City", "Malta", "Liechtenstein"], answer: 1},
+                {q: "How many days in a leap year?", options: ["364", "365", "366", "367"], answer: 2},
+                {q: "What is the tallest mountain?", options: ["K2", "Everest", "Kilimanjaro", "Denali"], answer: 1},
+                {q: "What is the speed of light?", options: ["299,792 km/s", "150,000 km/s", "500,000 km/s", "1,000,000 km/s"], answer: 0},
+                {q: "How many planets in our solar system?", options: ["7", "8", "9", "10"], answer: 1}
+            ],
+            science: [
+                {q: "What is H2O?", options: ["Oxygen", "Hydrogen", "Water", "Carbon"], answer: 2},
+                {q: "What is the atomic number of Carbon?", options: ["4", "6", "8", "12"], answer: 1},
+                {q: "What planet is closest to the Sun?", options: ["Venus", "Earth", "Mercury", "Mars"], answer: 2},
+                {q: "What is the powerhouse of the cell?", options: ["Nucleus", "Mitochondria", "Ribosome", "Chloroplast"], answer: 1},
+                {q: "What gas do plants absorb?", options: ["Oxygen", "Nitrogen", "Carbon Dioxide", "Hydrogen"], answer: 2},
+                {q: "What is the hardest natural substance?", options: ["Gold", "Iron", "Diamond", "Platinum"], answer: 2},
+                {q: "How many bones in human body?", options: ["186", "206", "226", "246"], answer: 1},
+                {q: "What is the largest organ?", options: ["Heart", "Brain", "Liver", "Skin"], answer: 3},
+                {q: "What is the boiling point of water?", options: ["90°C", "100°C", "110°C", "120°C"], answer: 1},
+                {q: "What is DNA short for?", options: ["Deoxyribonucleic Acid", "Dinitrogen Acid", "Dextrose Acid", "Dioxide Acid"], answer: 0}
+            ],
+            history: [
+                {q: "Who discovered America?", options: ["Magellan", "Columbus", "Vespucci", "Cortez"], answer: 1},
+                {q: "When did WWI start?", options: ["1912", "1914", "1916", "1918"], answer: 1},
+                {q: "Who was first US President?", options: ["Jefferson", "Adams", "Washington", "Lincoln"], answer: 2},
+                {q: "What year did Berlin Wall fall?", options: ["1987", "1988", "1989", "1990"], answer: 2},
+                {q: "Who was Cleopatra?", options: ["Greek Queen", "Roman Empress", "Egyptian Pharaoh", "Persian Princess"], answer: 2},
+                {q: "When was the Renaissance?", options: ["12th-13th century", "14th-17th century", "18th-19th century", "20th century"], answer: 1},
+                {q: "Who invented the printing press?", options: ["Da Vinci", "Gutenberg", "Newton", "Edison"], answer: 1},
+                {q: "What empire built Machu Picchu?", options: ["Aztec", "Maya", "Inca", "Olmec"], answer: 2},
+                {q: "When did the Titanic sink?", options: ["1910", "1911", "1912", "1913"], answer: 2},
+                {q: "Who was Napoleon?", options: ["French Emperor", "British King", "Spanish Monarch", "German Kaiser"], answer: 0}
+            ],
+            geography: [
+                {q: "What is the longest river?", options: ["Amazon", "Nile", "Yangtze", "Mississippi"], answer: 1},
+                {q: "What is the largest desert?", options: ["Gobi", "Sahara", "Arabian", "Antarctic"], answer: 3},
+                {q: "What country has most population?", options: ["India", "USA", "China", "Indonesia"], answer: 2},
+                {q: "What is the capital of Japan?", options: ["Osaka", "Kyoto", "Tokyo", "Nagoya"], answer: 2},
+                {q: "How many US states?", options: ["48", "49", "50", "51"], answer: 2},
+                {q: "What is the smallest continent?", options: ["Europe", "Antarctica", "Australia", "South America"], answer: 2},
+                {q: "What ocean is Hawaii in?", options: ["Atlantic", "Pacific", "Indian", "Arctic"], answer: 1},
+                {q: "What is the capital of Canada?", options: ["Toronto", "Vancouver", "Montreal", "Ottawa"], answer: 3},
+                {q: "What country is the Great Wall in?", options: ["Japan", "China", "Korea", "Mongolia"], answer: 1},
+                {q: "What is the largest country by area?", options: ["Canada", "USA", "China", "Russia"], answer: 3}
+            ],
+            sports: [
+                {q: "How many players in soccer team?", options: ["9", "10", "11", "12"], answer: 2},
+                {q: "What sport is Wimbledon?", options: ["Golf", "Tennis", "Cricket", "Rugby"], answer: 1},
+                {q: "How many rings in Olympics logo?", options: ["4", "5", "6", "7"], answer: 1},
+                {q: "What is a perfect score in bowling?", options: ["200", "250", "300", "350"], answer: 2},
+                {q: "How long is a marathon?", options: ["26.2 miles", "30 miles", "20 miles", "25 miles"], answer: 0},
+                {q: "What sport uses a puck?", options: ["Baseball", "Hockey", "Lacrosse", "Cricket"], answer: 1},
+                {q: "How many points for a touchdown?", options: ["5", "6", "7", "8"], answer: 1},
+                {q: "What is the diameter of basketball hoop?", options: ["16 inches", "18 inches", "20 inches", "22 inches"], answer: 1},
+                {q: "How many Grand Slams in tennis?", options: ["3", "4", "5", "6"], answer: 1},
+                {q: "What country invented golf?", options: ["England", "Ireland", "Scotland", "Wales"], answer: 2}
+            ],
+            movies: [
+                {q: "Who directed Titanic?", options: ["Spielberg", "Cameron", "Nolan", "Tarantino"], answer: 1},
+                {q: "What year was first Star Wars?", options: ["1975", "1977", "1979", "1981"], answer: 1},
+                {q: "Who played Iron Man?", options: ["Chris Evans", "Chris Hemsworth", "Robert Downey Jr", "Mark Ruffalo"], answer: 2},
+                {q: "What is highest grossing film?", options: ["Titanic", "Avatar", "Avengers", "Star Wars"], answer: 1},
+                {q: "Who directed The Godfather?", options: ["Scorsese", "Coppola", "De Palma", "Lucas"], answer: 1},
+                {q: "What year was Jurassic Park?", options: ["1991", "1992", "1993", "1994"], answer: 2},
+                {q: "Who played Joker in Dark Knight?", options: ["Nicholson", "Ledger", "Phoenix", "Leto"], answer: 1},
+                {q: "What is the Matrix about?", options: ["Time travel", "Virtual reality", "Aliens", "Zombies"], answer: 1},
+                {q: "Who directed Inception?", options: ["Nolan", "Cameron", "Spielberg", "Scott"], answer: 0},
+                {q: "What year was first Harry Potter?", options: ["1999", "2000", "2001", "2002"], answer: 2}
+            ],
+            music: [
+                {q: "Who is the King of Pop?", options: ["Elvis", "Michael Jackson", "Prince", "Madonna"], answer: 1},
+                {q: "What band sang Bohemian Rhapsody?", options: ["Beatles", "Queen", "Led Zeppelin", "Pink Floyd"], answer: 1},
+                {q: "How many strings on guitar?", options: ["4", "5", "6", "7"], answer: 2},
+                {q: "Who sang Thriller?", options: ["Prince", "Michael Jackson", "Madonna", "Whitney Houston"], answer: 1},
+                {q: "What is the highest female voice?", options: ["Alto", "Soprano", "Mezzo", "Contralto"], answer: 1},
+                {q: "Who wrote the 9th Symphony?", options: ["Mozart", "Bach", "Beethoven", "Chopin"], answer: 2},
+                {q: "What instrument has 88 keys?", options: ["Organ", "Piano", "Harpsichord", "Accordion"], answer: 1},
+                {q: "Who sang Like a Rolling Stone?", options: ["Bob Dylan", "Bruce Springsteen", "Neil Young", "Tom Petty"], answer: 0},
+                {q: "What year did Beatles break up?", options: ["1968", "1969", "1970", "1971"], answer: 2},
+                {q: "Who is the Queen of Soul?", options: ["Diana Ross", "Aretha Franklin", "Tina Turner", "Etta James"], answer: 1}
+            ],
+            tech: [
+                {q: "Who founded Apple?", options: ["Bill Gates", "Steve Jobs", "Mark Zuckerberg", "Elon Musk"], answer: 1},
+                {q: "What does CPU stand for?", options: ["Central Processing Unit", "Computer Personal Unit", "Central Program Utility", "Core Processing Unit"], answer: 0},
+                {q: "What year was Google founded?", options: ["1996", "1998", "2000", "2002"], answer: 1},
+                {q: "What does HTML stand for?", options: ["Hyper Text Markup Language", "High Tech Modern Language", "Home Tool Markup Language", "Hyperlinks Text Making Language"], answer: 0},
+                {q: "Who created Facebook?", options: ["Steve Jobs", "Bill Gates", "Mark Zuckerberg", "Jeff Bezos"], answer: 2},
+                {q: "What is the most used programming language?", options: ["Python", "Java", "JavaScript", "C++"], answer: 2},
+                {q: "What does USB stand for?", options: ["Universal Serial Bus", "United System Bus", "Universal System Board", "United Serial Board"], answer: 0},
+                {q: "What year was iPhone released?", options: ["2005", "2006", "2007", "2008"], answer: 2},
+                {q: "What is RAM?", options: ["Random Access Memory", "Read Access Memory", "Rapid Access Module", "Random Array Memory"], answer: 0},
+                {q: "Who founded Microsoft?", options: ["Steve Jobs", "Bill Gates", "Larry Page", "Jeff Bezos"], answer: 1}
+            ]
+        };
+
+        let currentCategory;
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let timeLeft = 30;
+        let timerInterval;
+
+        function startQuiz(category) {
+            currentCategory = category;
+            currentQuestionIndex = 0;
+            score = 0;
+
+            document.getElementById('categorySelection').style.display = 'none';
+            document.getElementById('quizGame').style.display = 'block';
+
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            const questions = quizData[currentCategory];
+            const question = questions[currentQuestionIndex];
+
+            document.getElementById('currentQuestion').textContent = currentQuestionIndex + 1;
+            document.getElementById('totalQuestions').textContent = questions.length;
+            document.getElementById('question').textContent = question.q;
+
+            const optionsDiv = document.getElementById('options');
+            optionsDiv.innerHTML = '';
+
+            question.options.forEach((option, index) => {
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'option';
+                optionDiv.textContent = option;
+                optionDiv.onclick = () => selectAnswer(index);
+                optionsDiv.appendChild(optionDiv);
+            });
+
+            startTimer();
+        }
+
+        function startTimer() {
+            timeLeft = 30;
+            document.getElementById('timer').textContent = timeLeft;
+
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                document.getElementById('timer').textContent = timeLeft;
+
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    selectAnswer(-1);
+                }
+            }, 1000);
+        }
+
+        function selectAnswer(selectedIndex) {
+            clearInterval(timerInterval);
+
+            const questions = quizData[currentCategory];
+            const question = questions[currentQuestionIndex];
+            const options = document.querySelectorAll('.option');
+
+            options.forEach((option, index) => {
+                option.onclick = null;
+                if (index === question.answer) {
+                    option.classList.add('correct');
+                } else if (index === selectedIndex) {
+                    option.classList.add('wrong');
+                }
+            });
+
+            if (selectedIndex === question.answer) {
+                score++;
+            }
+
+            setTimeout(() => {
+                currentQuestionIndex++;
+                if (currentQuestionIndex < questions.length) {
+                    loadQuestion();
+                } else {
+                    showResults();
+                }
+            }, 2000);
+        }
+
+        function showResults() {
+            document.getElementById('quizGame').style.display = 'none';
+            document.getElementById('quizResults').style.display = 'block';
+
+            const totalQuestions = quizData[currentCategory].length;
+            const percentage = Math.round((score / totalQuestions) * 100);
+
+            document.getElementById('finalScore').innerHTML = `
+                ${score} / ${totalQuestions}<br>
+                <span style="font-size: 1.5rem;">${percentage}%</span>
+            `;
+
+            saveScore(percentage);
+        }
+
+        function saveScore(percentage) {
+            const scores = JSON.parse(localStorage.getItem('quizScores') || '[]');
+            scores.push({
+                category: currentCategory,
+                score: percentage,
+                date: new Date().toLocaleDateString()
+            });
+            scores.sort((a, b) => b.score - a.score);
+            localStorage.setItem('quizScores', JSON.stringify(scores.slice(0, 10)));
+        }
+
+        function showLeaderboard() {
+            document.getElementById('quizResults').style.display = 'none';
+            document.getElementById('leaderboardSection').style.display = 'block';
+
+            const scores = JSON.parse(localStorage.getItem('quizScores') || '[]');
+            const leaderboardList = document.getElementById('leaderboardList');
+            leaderboardList.innerHTML = '';
+
+            if (scores.length === 0) {
+                leaderboardList.innerHTML = '<p style="text-align: center;">No scores yet!</p>';
+                return;
+            }
+
+            scores.forEach((score, index) => {
+                const item = document.createElement('div');
+                item.className = 'leaderboard-item';
+                item.innerHTML = `
+                    <span class="rank">#${index + 1}</span>
+                    <span>${score.category.toUpperCase()}</span>
+                    <span>${score.score}%</span>
+                    <span>${score.date}</span>
+                `;
+                leaderboardList.appendChild(item);
+            });
+        }
+    </script>
+</body>
+</html>
